@@ -1,7 +1,7 @@
 // Schermo della TV: il banditore, il palco con le carte, i giocatori, le animazioni.
 import { CARTA, euro, img, conArticolo } from './dati.js';
 import { el, esc, carta, cartaGirevole, sacco, coriandoli, qrSvg, vola, toast } from './comuni.js';
-import { suona, setVoce, setAudio, sbloccaAudio, sbloccaVoce } from './suoni.js';
+import { suona, setVoce, sbloccaAudio, sbloccaVoce, elencoVoci, impostaVoce, voceInUso, parla } from './suoni.js';
 
 const POSE = ['saluta', 'parla', 'indica', 'carta', 'busta', 'sussurra', 'occhiolino', 'ride', 'sorpreso', 'pensa', 'triste',
   'conta1', 'conta2', 'conta3', 'martello', 'soldi', 'mercato', 'festeggia'];
@@ -15,6 +15,7 @@ export class VistaTV {
     this.costruisci();
     this.cercaPose();
     addEventListener('resize', () => this.adatta());
+    addEventListener('voci-cambiate', () => { this.chiavi.sala = ''; if (this.S) this.sala(this.S); });
     this.adatta();
   }
 
@@ -135,7 +136,8 @@ export class VistaTV {
     box.classList.toggle('vis', S.fase === 'attesa');
     if (S.fase !== 'attesa') return;
     const gs = Object.entries(S.giocatori).sort((a, b) => a[1].ord - b[1].ord);
-    const k = JSON.stringify([S.cfg, gs.map(([u, g]) => g.nome + g.colore)]);
+    const voci = elencoVoci();
+    const k = JSON.stringify([S.cfg, gs.map(([u, g]) => g.nome + g.colore), voci.map((v) => v.name), voceInUso()]);
     if (this.chiavi.sala === k) return;
     this.chiavi.sala = k;
     const c = S.cfg;
@@ -159,6 +161,11 @@ export class VistaTV {
         ${this.riga('Carte in regalo', String(c.regalo), 'regalo', 1, 0, 3)}
         ${this.riga('Carte vincenti', c.vincenti ? String(c.vincenti) : 'automatico', 'vincenti', 1, 0, 6)}
         ${this.riga('Ritmo', ['', 'calmo', 'normale', 'svelto'][c.velocita === 0.75 ? 1 : c.velocita === 1.35 ? 3 : 2], 'velocita', 0, 0, 0)}
+        <div class="riga voce-riga"><span>Voce</span>${voci.length
+          ? `<select id="sceltaVoce">${voci.map((v) => `<option value="${esc(v.name)}" ${v.name === voceInUso() ? 'selected' : ''}>${esc(v.name.replace(/\s*\((italiano|italian|italia|italy)\b.*$/i, ''))}</option>`).join('')}</select>`
+          : '<em>nessuna voce italiana</em>'}<button id="provaVoce">prova</button></div>
+        ${this.riga('Velocità voce', Math.round((c.voceVel || 1) * 100) + '%', 'voceVel', 0.05, 0.7, 1.4)}
+        ${this.riga('Tono voce', Math.round((c.voceTono || 1) * 100) + '%', 'voceTono', 0.05, 0.6, 1.5)}
         <button class="apri" id="apri" ${gs.length ? '' : 'disabled'}>Apri la fiera!</button>
       </div>`;
     box.querySelectorAll('.togli').forEach((b) => { b.onclick = () => this.b.togliGiocatore(b.dataset.u); });
@@ -173,10 +180,21 @@ export class VistaTV {
           let v = c.vincenti + d;
           if (v === 1 || v === 2) v = d > 0 ? 3 : 0;
           this.b.cfg('vincenti', Math.max(0, Math.min(6, v)));
+        } else if (key === 'voceVel' || key === 'voceTono') {
+          this.b.cfg(key, passo(c[key] || 1, d, Number(b.dataset.min), Number(b.dataset.max)));
+          impostaVoce({ vel: this.b.S.cfg.voceVel || 1, tono: this.b.S.cfg.voceTono || 1 });
+          this.provaVoce();
         } else this.b.cfg(key, passo(c[key], d, Number(b.dataset.min), Number(b.dataset.max)));
       };
     });
     this.$('apri').onclick = () => { sbloccaAudio(); sbloccaVoce(); this.b.inizia(); };
+    const sel = box.querySelector('#sceltaVoce');
+    if (sel) sel.onchange = () => { this.b.cfg('voceNome', sel.value); impostaVoce({ nome: sel.value }); this.provaVoce(); };
+    box.querySelector('#provaVoce').onclick = () => this.provaVoce();
+  }
+  provaVoce() {
+    sbloccaAudio();
+    parla('Signore e signori, benvenuti alla grande fiera di Natale! Chi offre due euro e cinquanta?', { interrompi: true });
   }
   riga(t, v, k, d, min, max) {
     return `<div class="riga"><span>${t}</span><button data-k="${k}" data-d="${-d || -1}" data-min="${min}" data-max="${max}">meno</button><b>${v}</b><button data-k="${k}" data-d="${d || 1}" data-min="${min}" data-max="${max}">più</button></div>`;

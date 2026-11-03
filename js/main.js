@@ -1,7 +1,7 @@
 // Avvio: TV del banditore (?tv), telefono del giocatore (?s=CODICE) oppure pagina iniziale.
 import { creaRete } from './rete.js';
 import { esc, schermoAcceso } from './comuni.js';
-import { sbloccaAudio, sbloccaVoce, setVoce } from './suoni.js';
+import { sbloccaAudio, sbloccaVoce, setVoce, impostaVoce } from './suoni.js';
 
 const q = new URLSearchParams(location.search);
 const radice = document.getElementById('app');
@@ -45,6 +45,7 @@ async function tv() {
         if (nb) b.aggiungiBot(nb);
       }
       setVoce(b.S.cfg.voce !== false);
+      impostaVoce({ nome: b.S.cfg.voceNome || '', vel: b.S.cfg.voceVel || 1, tono: b.S.cfg.voceTono || 1 });
       ok();
     };
     radice.querySelector('#nuova').onclick = via(false);

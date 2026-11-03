@@ -42,6 +42,10 @@ in corso), **Voce** sì/no, **Schermo intero**. Se la TV si ricarica, *Riprendi 
 
 - iPad: Safari → Condividi → *Aggiungi alla schermata Home* (si apre a tutto schermo), poi AirPlay o cavo HDMI sulla TV
   con il volume alto. Il primo tocco su *Apri una nuova fiera* attiva la voce.
+- **Voce del banditore**: è quella del dispositivo. Sull'iPad scarica una voce italiana di qualità (Impostazioni →
+  Accessibilità → Contenuti letti ad alta voce → Voci → Italiano → una voce *Premium* o *Avanzata*, es. Luca),
+  poi riapri il gioco: nella sala d'attesa, in "Regole della casa", si sceglie la voce, si prova e si regolano
+  velocità e tono. Su un PC con Edge le voci *Online (Natural)* di Microsoft sono le più naturali.
 - Tutti i telefoni devono essere online (Wi-Fi di casa o dati). Il gioco tiene lo schermo acceso.
 - I soldi sono veri solo alla fine: il gioco tiene i conti e il saldo dice chi deve mettere e chi ritirare.
 

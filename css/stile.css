@@ -346,7 +346,7 @@ img { -webkit-user-drag: none; user-select: none; }
 .sala-gioc .togli { border: 0; background: #0001; border-radius: 99px; font-size: 13px; padding: 4px 8px; margin-left: 10px; color: #7d6b5d; }
 .sala-gioc .vuoto { font-size: 26px; text-align: center; width: 100%; margin-top: 60px; }
 .sala-cfg { width: 410px; display: flex; flex-direction: column; }
-.sala-cfg .riga { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 21px; font-weight: 700; }
+.sala-cfg .riga { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 20px; font-weight: 700; }
 .sala-cfg .riga span { flex: 1; }
 .sala-cfg .riga b { min-width: 110px; text-align: center; font-size: 22px; }
 .sala-cfg .riga button { border: 0; background: #e8d9b5; border-radius: 10px; padding: 8px 10px; font-weight: 800; font-size: 15px; }
@@ -367,3 +367,7 @@ img { -webkit-user-drag: none; user-select: none; }
 .risultati .apri { font-size: 34px; padding: 14px; }
 .pausa-tv { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 50; font: 120px 'Rye'; color: var(--oro); background: #000b; padding: 30px 80px; border-radius: 40px; display: none; }
 .pausa-tv.vis { display: block; }
+
+.sala-cfg .voce-riga select { flex: 2; min-width: 0; font: 700 17px 'Nunito'; padding: 8px; border-radius: 10px; border: 2px solid var(--oro-scuro); background: #fff; color: var(--inchiostro); }
+.sala-cfg .voce-riga span { flex: 0 0 auto; margin-right: 4px; }
+.sala-cfg .voce-riga em { flex: 2; font-size: 16px; opacity: .7; }

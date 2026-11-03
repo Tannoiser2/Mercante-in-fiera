@@ -54,16 +54,48 @@ export const SUONI = {
 export function suona(n) { try { SUONI[n]?.(); } catch (e) { /* ok */ } }
 
 // ------------------------------------------------------------- voce
+// Le voci sono quelle del dispositivo: su iPad conviene scaricare una voce "Premium" o "Avanzata"
+// (Impostazioni > Accessibilità > Contenuti letti ad alta voce > Voci > Italiano), su Windows/Edge le
+// voci "Online (Natural)" di Microsoft, su Chrome "Google italiano".
 let voce = null;
+let sceltaNome = '';
+let velVoce = 1.0, tonoVoce = 1.0;
 export let voceAttiva = true;
 export function setVoce(v) { voceAttiva = v; if (!v) try { speechSynthesis.cancel(); } catch (e) { /* ok */ } }
-function scegliVoce() {
-  try {
-    const vs = speechSynthesis.getVoices().filter((v) => v.lang && v.lang.toLowerCase().startsWith('it'));
-    // preferisce voci maschili note, poi qualunque voce italiana
-    voce = vs.find((v) => /luca|diego|cosimo|giorgio|paolo|male|uomo/i.test(v.name)) || vs.find((v) => /premium|enhanced|natural/i.test(v.name)) || vs[0] || null;
-  } catch (e) { voce = null; }
+
+// punteggio: più alto = voce più naturale
+function qualita(v) {
+  const n = v.name.toLowerCase();
+  let q = 0;
+  if (/premium/.test(n)) q += 50;
+  if (/natural|neural|online/.test(n)) q += 45;
+  if (/enhanced|avanzat|migliorat|ottimizzat/.test(n)) q += 35;
+  if (/google/.test(n)) q += 20;
+  if (/compact|eloquence|espeak|bad|grandpa|grandma|nonn|rocko|reed|sandy|shelley|flo|eddy/.test(n)) q -= 40;
+  if (/luca|diego|giuseppe|cosimo|paolo/.test(n)) q += 6; // voci maschili, come il banditore
+  if (v.localService === false) q += 4;
+  if ((v.lang || '').toLowerCase() === 'it-it') q += 2;
+  return q;
 }
+export function elencoVoci() {
+  try {
+    return speechSynthesis.getVoices()
+      .filter((v) => v.lang && v.lang.toLowerCase().startsWith('it'))
+      .sort((a, b) => qualita(b) - qualita(a) || a.name.localeCompare(b.name));
+  } catch (e) { return []; }
+}
+function scegliVoce() {
+  const vs = elencoVoci();
+  voce = vs.find((v) => v.name === sceltaNome) || vs[0] || null;
+  dispatchEvent(new Event('voci-cambiate'));
+}
+export function impostaVoce({ nome, vel, tono } = {}) {
+  if (nome !== undefined) sceltaNome = nome;
+  if (vel) velVoce = vel;
+  if (tono) tonoVoce = tono;
+  scegliVoce();
+}
+export function voceInUso() { return voce ? voce.name : ''; }
 if (typeof speechSynthesis !== 'undefined') {
   scegliVoce();
   speechSynthesis.onvoiceschanged = scegliVoce;
@@ -79,13 +111,13 @@ export function parla(testo, { interrompi = false } = {}) {
     try {
       if (interrompi) speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(testo);
-      u.lang = 'it-IT';
+      u.lang = voce?.lang || 'it-IT';
       if (voce) u.voice = voce;
-      u.rate = 1.08; u.pitch = 1.0;
+      u.rate = velVoce; u.pitch = tonoVoce;
       let fatto = false;
       const fine = () => { if (!fatto) { fatto = true; ok(); } };
       u.onend = fine; u.onerror = fine;
-      setTimeout(fine, stima + 2500);
+      setTimeout(fine, stima / velVoce + 2500);
       speechSynthesis.speak(u);
     } catch (e) { setTimeout(ok, stima); }
   });
