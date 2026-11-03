@@ -1,0 +1,43 @@
+# Pubblica il gioco (pagine statiche, nessuna compilazione) su GitHub Pages.
+# Non parte a ogni modifica: si avvia a mano (Actions → Pubblica → Run workflow)
+# oppure con un commit che nel messaggio contiene [pubblica].
+name: Pubblica
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[pubblica]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepara la cartella del sito
+        run: |
+          mkdir -p sito
+          cp -r index.html css js font carte avatar ludoteca sito/
+          touch sito/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: sito
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

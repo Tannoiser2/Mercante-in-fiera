@@ -1,0 +1,44 @@
+{
+  "rules": {
+    "mercante": {
+      "rooms": {
+        "$code": {
+          ".read": "auth != null",
+          ".write": "auth != null && data.child('host').val() === auth.uid && !newData.exists()",
+          ".validate": "$code.length === 4",
+          "host": {
+            ".write": "auth != null && !data.exists() && newData.val() === auth.uid"
+          },
+          "created": {
+            ".write": "auth != null && !data.exists()"
+          },
+          "stato": {
+            ".write": "auth != null && newData.parent().child('host').val() === auth.uid",
+            ".validate": "newData.isString() && newData.val().length <= 60000"
+          },
+          "giocatori": {
+            "$uid": {
+              ".write": "auth != null && ($uid === auth.uid || root.child('mercante/rooms/' + $code + '/host').val() === auth.uid)",
+              ".validate": "!newData.exists() || (newData.hasChildren(['nome']) && newData.child('nome').isString() && newData.child('nome').val().length <= 20)"
+            }
+          },
+          "offerte": {
+            "$uid": {
+              ".write": "auth != null && ($uid === auth.uid || root.child('mercante/rooms/' + $code + '/host').val() === auth.uid)",
+              ".validate": "!newData.exists() || (newData.hasChildren(['v', 'lotto']) && newData.child('v').isNumber() && newData.child('v').val() <= 100000)"
+            }
+          },
+          "richieste": {
+            "$id": {
+              ".write": "auth != null && ((!data.exists() && newData.child('da').val() === auth.uid) || (root.child('mercante/rooms/' + $code + '/host').val() === auth.uid && !newData.exists()))",
+              ".validate": "!newData.exists() || (newData.hasChildren(['da', 'tipo']) && newData.child('tipo').isString() && newData.child('tipo').val().length <= 12)"
+            }
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    }
+  }
+}
