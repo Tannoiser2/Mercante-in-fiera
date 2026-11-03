@@ -180,6 +180,7 @@ export class Banditore {
     S.fase = 'regali';
     S.mazzo = mescola(CARTE.map((c) => c.id));
     S.nere = {}; S.coperte = {}; S.eliminate = []; S.tentativi = {}; S.vincite = []; S.proposte = {};
+    S.serie = null; S.sfortuna = null; S.pochi = [];
     for (const uid of Object.keys(S.giocatori)) S.conti[uid] = { posta: S.cfg.posta, aste: 0, scambi: 0, premi: 0 };
     this.salva();
     this.regia();
@@ -319,7 +320,18 @@ export class Banditore {
     const minimo = L.migliore ? L.migliore.v + S.cfg.passo : L.base;
     if (!(v >= minimo) || v > 100000) return;
     if (L.migliore && L.migliore.uid === uid) return;
+    const prima = L.migliore;
     L.migliore = { uid, v };
+    // che battuta dire: rilancio grosso, prezzo alto, duello tra due giocatori o offerta normale
+    L.storia = (L.storia || []).concat(uid).slice(-6);
+    const st = L.storia, n = st.length;
+    let tipo = 'offerta', extra = {};
+    if (prima && v - prima.v >= 4 * S.cfg.passo) tipo = 'rilancioGrosso';
+    else if (!L.alto && v >= Math.max(300, L.base * 8)) { tipo = 'prezzoAlto'; L.alto = true; }
+    else if (n >= 4 && st[n - 1] === st[n - 3] && st[n - 2] === st[n - 4] && st[n - 1] !== st[n - 2] && Math.random() < 0.6) {
+      tipo = 'duello'; extra = { altro: this.nome(st[n - 2]) };
+    }
+    this._battuta = { tipo, extra };
     L.conta = 0;
     L.offerte++;
     this.segnale++;
@@ -329,7 +341,7 @@ export class Banditore {
     // annuncia l'ultima offerta (se ne arrivano tante insieme, dice solo l'ultima)
     clearTimeout(this._annuncio);
     this._annuncio = setTimeout(() => {
-      if (L.stato === 'aperto' && L.migliore) this.di('offerta', { nome: this.nome(L.migliore.uid), cifra: L.migliore.v }, { interrompi: true });
+      if (L.stato === 'aperto' && L.migliore) this.di(this._battuta.tipo, { ...this._battuta.extra, nome: this.nome(L.migliore.uid), cifra: L.migliore.v }, { interrompi: true });
     }, 250);
   }
 
@@ -349,10 +361,16 @@ export class Banditore {
     suona('martello');
     this.vista.martello();
     await this.di('conta3', {}, { interrompi: true });
-    this.di('aggiudicato', { nome: this.nome(uid), cifra: v });
+    // lotti vinti di fila dallo stesso giocatore: doppietta, tripletta, poker...
+    if (S.serie?.uid === uid) S.serie.n++; else S.serie = { uid, n: 1 };
+    const serie = S.serie.n;
+    const detto = this.di(L.offerte === 1 && Math.random() < 0.6 ? 'affare' : 'aggiudicato', { nome: this.nome(uid), cifra: v });
     await this.attendi(500);
     this.evento('aggiudicato', { uid, carte: L.carte, v, lotto: L.id });
-    await this.attendi(1800);
+    if (serie >= 2) {
+      await detto;
+      await this.di(serie === 2 ? 'doppietta' : serie === 3 ? 'tripletta' : 'poker', { nome: this.nome(uid), k: serie });
+    } else await this.attendi(1800);
   }
 
   async invenduto(L) {
@@ -416,6 +434,8 @@ export class Banditore {
     return opz.length ? caso(opz) : null;
   }
 
+  vive(uid) { return Object.keys(this.S.nere).filter((id) => this.proprietario(id) === uid); }
+
   proprietario(id) {
     const u = this.S.nere[id];
     return u && this.S.giocatori[u] && !this.S.eliminate.includes(id) ? u : null;
@@ -453,11 +473,24 @@ export class Banditore {
           for (const [pid, p] of Object.entries(S.proposte)) if (p.carta === id) delete S.proposte[pid];
           this.evento('eliminata', { uid: u, carta: id });
           suona('peccato');
-          await this.di('eliminata', { nome: this.nome(u), carta: id });
-        } else if (Math.random() < 0.45) {
-          await this.di('nessuno', { carta: id });
+          // la stessa persona perde più carte di fila: sfortuna doppia, tripla...
+          if (S.sfortuna?.uid === u) S.sfortuna.n++; else S.sfortuna = { uid: u, n: 1 };
+          const sf = S.sfortuna.n;
+          await this.di(sf === 2 ? 'sfortunaDoppia' : sf >= 3 ? 'sfortunaTripla' : 'eliminata', { nome: this.nome(u), carta: id });
+          if (!this.vive(u).length) await this.di('maniVuote', { nome: this.nome(u) });
+        } else {
+          const r = Math.random();
+          if (r < 0.4) await this.di('nessuno', { carta: id });
+          else if (r < 0.5) await this.di('salvi');
         }
         await this.attendi(600);
+      }
+      // annuncia quando restano in pochi con le carte in mano
+      const inCorsa = Object.keys(S.giocatori).filter((x) => this.vive(x).length).length;
+      S.pochi = S.pochi || [];
+      if (inCorsa > 0 && inCorsa <= 3 && Object.keys(S.giocatori).length > inCorsa && !S.pochi.includes(inCorsa) && R.daSvelare.length) {
+        S.pochi.push(inCorsa);
+        await this.di('pochi', { k: inCorsa });
       }
       await this.attendi(1200);
     }

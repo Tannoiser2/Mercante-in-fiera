@@ -1,6 +1,6 @@
 // Il telefono del giocatore: offerte all'asta, le proprie carte, compravendite, vittoria.
 import { RADICE } from './rete.js';
-import { CARTA, euro, img, conArticolo } from './dati.js';
+import { CARTA, euro, img, conArticolo, vincentiPerGiocatori } from './dati.js';
 import { el, esc, carta, sacco, coriandoli, toast, schermoAcceso } from './comuni.js';
 import { suona, sbloccaAudio } from './suoni.js';
 
@@ -131,9 +131,9 @@ export class Telefono {
     } else if (S.fase === 'regali') {
       h += '<div class="aspetta"><h2>I regali della casa</h2><p>Il banditore regala una carta a ciascuno...</p></div>';
     } else if (S.fase === 'asta') {
-      h += this.htmlAsta();
+      h += this.htmlAsta() + this.htmlProbabilita();
     } else if (['premi', 'svela', 'finale'].includes(S.fase)) {
-      h += this.htmlSvela();
+      h += this.htmlSvela() + this.htmlProbabilita();
     } else if (S.fase === 'fine') {
       h += this.htmlFine();
     }
@@ -192,6 +192,45 @@ export class Telefono {
       }).join('')}</div></div>`;
     if (ultima && S.fase === 'svela') h += `<div class="ultima-tel"><img src="${img(ultima, true)}" alt=""><span>ultima scoperta: <b>${esc(CARTA[ultima].nome)}</b><br>ne mancano ${R.daSvelare.length}</span></div>`;
     return h;
+  }
+
+  // Probabilità di vincere almeno un premio con le carte che ho, rispetto alle carte rosse ancora coperte.
+  // Ogni carta rossa non ancora scoperta ha la stessa probabilità di essere una delle vincenti.
+  probabilita() {
+    const S = this.S, m = this.vive(this.me).length;
+    let N, W, premi;
+    if (!S.rosse) {
+      N = 40;
+      W = S.cfg.vincenti || vincentiPerGiocatori(Object.keys(S.giocatori).length);
+      premi = Object.values(S.conti).reduce((a, c) => a + c.posta + c.aste, 0);
+    } else {
+      const R = S.rosse;
+      const resto = R.vincenti.map((id, i) => ({ id, v: R.premi[i] })).filter((x) => !R.premiate.includes(x.id));
+      N = R.daSvelare.length + resto.length;
+      W = resto.length;
+      premi = resto.reduce((a, x) => a + x.v, 0) + (R.riporto || 0);
+    }
+    if (!N || !W) return null;
+    let nessuno = 1;
+    for (let i = 0; i < W; i++) nessuno *= Math.max(0, N - m - i) / (N - i);
+    return { p: 1 - nessuno, atteso: Math.round((m / N) * premi), m, N, W, provvisorio: !S.rosse };
+  }
+
+  htmlProbabilita() {
+    const P = this.probabilita();
+    if (!P) return '';
+    const pc = P.p * 100;
+    const testo = P.m === 0 ? '0%' : pc >= 99.95 ? '100%' : pc > 99 ? 'oltre il 99%' : pc < 1 ? "meno dell'1%" : Math.round(pc) + '%';
+    const nota = P.m === 0
+      ? 'Nessuna carta in mano: compra all\'asta o dagli altri giocatori!'
+      : `${P.m} ${P.m === 1 ? 'carta' : 'carte'} su ${P.N} ancora in gioco, ${P.W} ${P.W === 1 ? 'premio' : 'premi'} da assegnare`;
+    return `<div class="prob ${pc >= 50 ? 'alta' : ''}">
+      <div class="prob-t">Probabilità di vincere almeno un premio</div>
+      <div class="prob-v">${testo}</div>
+      <div class="barra"><i style="width:${Math.max(P.m ? 2 : 0, Math.min(100, pc)).toFixed(1)}%"></i></div>
+      <small>${nota}</small>
+      ${P.m ? `<small>vincita media attesa: <b>${euro(P.atteso)}</b>${P.provvisorio ? ' (il montepremi cresce con le aste)' : ''}</small>` : ''}
+    </div>`;
   }
 
   htmlFine() {

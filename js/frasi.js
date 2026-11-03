@@ -10,7 +10,7 @@ export const FRASI = {
     ['Benvenuto {nome}! Accomodati, che qui si fanno affari d\'oro!', 'saluta'],
     ['Ecco {nome}! Che bello vederti alla fiera!', 'occhiolino'],
     ['Arriva {nome}! Tenete d\'occhio il portafoglio!', 'ride'],
-    ['Un applauso per {nome}, cliente affezionato!', 'saluta'],
+    ['Un applauso per {nome}, cliente di fiducia!', 'saluta'],
     ['Ciao {nome}! Ho già messo da parte qualcosa per te...', 'occhiolino'],
   ],
   inizio: [
@@ -46,7 +46,7 @@ export const FRASI = {
     ['{cifra} da {nome}!', 'indica'],
     ['{nome} offre {cifra}! Chi dice di più?', 'indica'],
     ['Ho {cifra} da {nome}! Si sale!', 'indica'],
-    ['Bravo {nome}! {cifra}!', 'occhiolino'],
+    ['Grande {nome}! {cifra}!', 'occhiolino'],
     ['{cifra}! {nome} non si fa spaventare!', 'sorpreso'],
     ['{nome} rilancia: {cifra}!', 'indica'],
   ],
@@ -119,7 +119,7 @@ export const FRASI = {
   ultimoMercato: [['Ultima occasione per trattare! {k} secondi!', 'mercato']],
   vince: [
     ['Il premio di {cifra} va a... {nome}! Con {carta}!', 'festeggia'],
-    ['{carta}! Vince {nome}: {cifra}! Bravissimo!', 'festeggia'],
+    ['{carta}! Vince {nome}: {cifra}! Che fortuna!', 'festeggia'],
     ['Evviva {nome}! {carta} vale {cifra}!', 'festeggia'],
   ],
   vinceNessuno: [
@@ -143,6 +143,128 @@ export const FRASI = {
   ],
   scambioNo: [['Niente da fare, trattativa saltata!', 'triste']],
 };
+
+// ------------------------------------------------------------------ battute in più
+// (si aggiungono a quelle sopra; le categorie nuove le usa il banditore nei momenti giusti)
+const ALTRE = {
+  // vince due, tre, quattro lotti di fila
+  doppietta: [
+    ['Vai di doppietta, {nome}!', 'festeggia'],
+    ['Doppietta per {nome}! Due lotti di fila, che appetito!', 'ride'],
+    ['E sono due! {nome} fa doppietta!', 'indica'],
+    ['{nome} non si ferma più: doppietta!', 'occhiolino'],
+  ],
+  tripletta: [
+    ['Vai di tripletta, {nome}! Tre su tre!', 'festeggia'],
+    ['Tripletta! {nome} si sta comprando tutta la fiera!', 'sorpreso'],
+    ['Tre lotti di fila per {nome}! Chi ferma più {nome}?', 'ride'],
+  ],
+  poker: [
+    ['Poker di {nome}! Quattro lotti di fila, che collezione!', 'sorpreso'],
+    ['{nome} fa man bassa: {k} lotti di fila! Ma gli altri dormono?', 'ride'],
+    ['Ancora {nome}! {k} di fila, preparo il carretto per portarle a casa!', 'festeggia'],
+  ],
+  // due giocatori che si rilanciano a vicenda
+  duello: [
+    ['È un duello tra {nome} e {altro}! {cifra}!', 'indica'],
+    ['{nome} e {altro} non mollano! Siamo a {cifra}!', 'sorpreso'],
+    ['Sfida all\'ultimo centesimo: {nome} rilancia a {cifra}!', 'indica'],
+    ['{nome} contro {altro}, come a mezzogiorno di fuoco! {cifra}!', 'ride'],
+  ],
+  rilancioGrosso: [
+    ['Rilancio da capogiro! {nome} offre {cifra}!', 'sorpreso'],
+    ['Wow! {nome} spara {cifra} tutto in un colpo!', 'sorpreso'],
+    ['{nome} non ha tempo da perdere: {cifra}!', 'indica'],
+  ],
+  prezzoAlto: [
+    ['Si fa sul serio, signori: {cifra}!', 'soldi'],
+    ['{cifra}! Questa carta vale più del panettone!', 'soldi'],
+    ['A {cifra} questa carta entra nella storia della fiera!', 'sorpreso'],
+  ],
+  affare: [
+    ['Affarone! {nome} la porta via a prezzo di partenza!', 'occhiolino'],
+    ['Nessuno rilancia? {nome} fa l\'affare della serata!', 'ride'],
+    ['A prezzo di saldo per {nome}!', 'soldi'],
+  ],
+  sfortunaDoppia: [
+    ['Doppietta di sfortuna per {nome}! Mi dispiace tanto!', 'triste'],
+    ['Peccato {nome}, un\'altra carta che se ne va!', 'triste'],
+    ['{nome}, oggi la fortuna guarda dall\'altra parte... ma non è finita!', 'pensa'],
+  ],
+  sfortunaTripla: [
+    ['Tripletta di sfortuna per {nome}! Una fetta di pandoro di consolazione, presto!', 'triste'],
+    ['{nome} perde ancora! Coraggio, il vento gira!', 'triste'],
+  ],
+  maniVuote: [
+    ['{nome} resta a mani vuote! Ma puoi sempre comprare dagli altri!', 'triste'],
+    ['Niente più carte per {nome}... tratta, tratta, che non è finita!', 'mercato'],
+  ],
+  salvi: [
+    ['Respirate: questa non era di nessuno!', 'ride'],
+    ['Pericolo scampato per tutti!', 'occhiolino'],
+  ],
+  pochi: [
+    ['Siamo rimasti in pochi con le carte in mano: {k} giocatori ancora in corsa!', 'pensa'],
+    ['La tensione sale: solo {k} giocatori hanno ancora carte!', 'sussurra'],
+  ],
+};
+for (const [k, l] of Object.entries(ALTRE)) FRASI[k] = (FRASI[k] || []).concat(l);
+
+// più varietà nei momenti che si ripetono spesso
+const VARIANTI = {
+  offerta: [
+    ['{nome} alza la mano: {cifra}!', 'indica'],
+    ['Abbiamo {cifra}! Grazie {nome}!', 'occhiolino'],
+    ['{cifra} da {nome}! Chi rilancia?', 'indica'],
+    ['{nome} ci crede: {cifra}!', 'indica'],
+    ['Ecco {nome} con {cifra}! Non è finita!', 'indica'],
+    ['{cifra}! {nome} ha l\'occhio lungo!', 'occhiolino'],
+  ],
+  conta1: [['{cifra} uno...', 'conta1'], ['A {cifra}... e uno!', 'conta1'], ['E uno! Chi offre di più?', 'conta1']],
+  conta2: [['E due! Ultima chiamata!', 'conta2'], ['{cifra} e due... chi tace acconsente!', 'conta2'], ['E due! Dopo non piangete!', 'conta2']],
+  conta3: [['E tre! Aggiudicato!', 'martello'], ['E tre! Venduto!', 'martello'], ['E treee! Aggiudicato!', 'martello']],
+  aggiudicato: [
+    ['Aggiudicato a {nome} per {cifra}! Buon divertimento!', 'martello'],
+    ['Il martello ha parlato: va a {nome}!', 'martello'],
+    ['{nome} se la porta a casa per {cifra}!', 'occhiolino'],
+    ['Venduto! {nome}, la carta vola sul tuo telefono!', 'indica'],
+  ],
+  lottoScoperto1: [
+    ['Signori, guardate qui: {carta}! Base {cifra}!', 'carta'],
+    ['Pezzo raro, pezzo bello: {carta}!', 'carta'],
+    ['Ecco {carta}! La vorrei tenere io, ma ve la vendo!', 'occhiolino'],
+    ['Arriva {carta}, fresca fresca di fiera!', 'carta'],
+  ],
+  silenzio1: [
+    ['Tutto tace... come la notte di Natale!', 'sussurra'],
+    ['Pronto? C\'è qualcuno? Ve la regalo quasi!', 'sorpreso'],
+    ['Silenzio di tomba! Eppure è una bellezza!', 'pensa'],
+  ],
+  eliminata: [
+    ['Oh no, {nome}! {carta} è stata scoperta!', 'triste'],
+    ['{carta}! Ahimè {nome}, la devi lasciare!', 'triste'],
+    ['Esce {carta}: un abbraccio a {nome}!', 'triste'],
+  ],
+  nessuno: [
+    ['{carta}! Nessuno ce l\'ha, si va avanti!', 'occhiolino'],
+    ['Ecco {carta}... non fa male a nessuno!', 'ride'],
+  ],
+  indizio: [
+    ['Ve lo dico all\'orecchio: arriva {indizio}!', 'sussurra'],
+    ['Indovinello: la prossima carta è {indizio}. Chi la teme?', 'sussurra'],
+  ],
+  vince: [
+    ['Ed ecco {carta}! {nome} vince {cifra}! Applausi!', 'festeggia'],
+    ['Fortuna sfacciata: {nome} si prende {cifra} con {carta}!', 'festeggia'],
+  ],
+  arrivo: [
+    ['Avanti {nome}, c\'è posto per tutti!', 'saluta'],
+    ['Oh, {nome}! Hai portato il portafoglio?', 'ride'],
+  ],
+  mercatoChiuso: [['Tempo scaduto! Chi ha venduto ha venduto!', 'martello']],
+  scambioFatto: [['Bell\'affare! Ora {carta} è di {nome}!', 'occhiolino']],
+};
+for (const [k, l] of Object.entries(VARIANTI)) FRASI[k] = (FRASI[k] || []).concat(l);
 
 export function frase(tipo, dati = {}) {
   const l = FRASI[tipo];

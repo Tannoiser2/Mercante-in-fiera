@@ -32,6 +32,12 @@ Si gioca qui: **https://tannoiser2.github.io/Mercante-in-fiera/** (sulla TV: *Ap
 6. **Finale** - restano le carte vincenti: si scoprono dal premio più piccolo al primo premio (con un ultimo mercato
    prima degli ultimi due). Sul telefono del vincitore esplode la schermata "HAI VINTO!". Un premio che non ha
    nessuno passa alla carta successiva.
+- **Carte coperte**: la carta in regalo e quelle comprate coperte o al buio le vede solo chi le ha (sulla TV e
+  sui telefoni degli altri c'è il dorso). Dal telefono si copre o si mostra una carta toccandola, oppure tutte
+  insieme. Si può anche comprare a scatola chiusa la carta coperta di un altro giocatore.
+- **Probabilità**: sul telefono c'è sempre la probabilità di vincere almeno un premio con le carte che hai
+  (ogni carta rossa ancora coperta ha la stessa probabilità di essere vincente) e la vincita media attesa.
+
 7. **Conti** - la TV mostra per ciascuno posta, aste, scambi, premi e il **saldo** (quanto mettere o ritirare dal
    salvadanaio vero). Con "Un'altra partita!" si riparte con gli stessi giocatori.
 
@@ -53,7 +59,7 @@ in corso), **Voce** sì/no, **Schermo intero**. Se la TV si ricarica, *Riprendi 
 
 Le 18 pose dell'avatar (saluta, indica, martello, sussurra, festeggia...) sono in `avatar/<posa>.webp`; `avatar/base.webp`
 è lo sticker originale usato se una posa manca: l'elenco completo, con le descrizioni da passare a ChatGPT, è in [AVATAR_POSE.md](AVATAR_POSE.md).
-Le battute sono in `js/frasi.js` (si possono aggiungere liberamente: `{nome}`, `{carta}`, `{cifra}`, `{k}`, `{indizio}`).
+Le battute (oltre 160, con doppiette, triplette, duelli tra giocatori, rilanci da capogiro, sfortune a ripetizione...) sono in `js/frasi.js` (si possono aggiungere liberamente: `{nome}`, `{carta}`, `{cifra}`, `{k}`, `{indizio}`).
 
 ## Struttura
 
