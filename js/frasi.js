@@ -102,6 +102,11 @@ export const FRASI = {
     ['Si tratta! {k} secondi per scambiarvi le carte!', 'mercato'],
   ],
   mercatoChiuso: [['Mercato chiuso! Si torna a scoprire.', 'martello'], ['Basta trattare! Avanti!', 'martello']],
+  mercatoNessuno: [
+    ['Nessuno vuole trattare? Allora si va avanti!', 'pensa'],
+    ['Tutti soddisfatti delle proprie carte! Avanti!', 'occhiolino'],
+    ['Niente affari? Bene, si torna a scoprire!', 'martello'],
+  ],
   eliminata: [
     ['Ahi ahi {nome}, {carta} se ne va!', 'triste'],
     ['Peccato {nome}! Saluta {carta}!', 'triste'],

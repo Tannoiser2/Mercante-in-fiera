@@ -290,7 +290,17 @@ export class VistaTV {
     if (!S.mercato && !S.indizio) { m?.remove(); return; }
     if (!m) { m = el('div', 'banner-mercato'); p.appendChild(m); }
     m.innerHTML = (S.indizio ? `<div class="indizio">Prossima carta: <b>${esc(S.indizio)}</b></div>` : '')
-      + (S.mercato ? `<div class="mercato-t">MERCATO APERTO <span class="sec">${S.mercato.resto}</span></div><div class="mercato-s">vendete e comprate dal telefono!</div>` : '');
+      + (S.mercato ? `<div class="mercato-t">MERCATO APERTO <span class="sec">${S.mercato.resto}</span></div><div class="mercato-s">vendete e comprate dal telefono!</div>
+        <div class="mercato-fine"><button class="chiudi-mercato" id="chiudiMercato">Chiudi il mercato</button>
+        ${this.passano(S)}</div>` : '');
+    const bc = m.querySelector('#chiudiMercato');
+    if (bc) bc.onclick = (e) => { e.stopPropagation(); sbloccaAudio(); bc.disabled = true; this.b.saltaAvanti(); };
+  }
+
+  passano(S) {
+    const veri = Object.entries(S.giocatori).filter(([, g]) => !g.bot);
+    const n = veri.filter(([u]) => S.mercato?.passo?.includes(u)).length;
+    return n ? `<span class="passano">non trattano: ${n} su ${veri.length}</span>` : '';
   }
 
   lotto(L, S, ridisegna = false) {

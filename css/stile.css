@@ -391,3 +391,12 @@ img { -webkit-user-drag: none; user-select: none; }
 .prob .barra { height: 12px; border-radius: 99px; background: #0006; overflow: hidden; box-shadow: inset 0 0 0 1px #fff3; }
 .prob .barra i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, #e63946, #f2c14e 60%, #43aa8b); transition: width .6s; }
 .prob small { display: block; margin-top: 6px; font-size: 13px; opacity: .9; }
+
+.mercato-fine { display: flex; align-items: center; justify-content: center; gap: 24px; margin-top: 14px; }
+.chiudi-mercato { border: 0; border-radius: 20px; padding: 16px 44px; font: 36px 'Rye'; color: var(--inchiostro); background: linear-gradient(#ffe08a, var(--oro)); box-shadow: 0 6px 0 var(--oro-scuro), 0 10px 20px #0006; }
+.chiudi-mercato:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--oro-scuro); }
+.chiudi-mercato:disabled { opacity: .5; }
+.passano { font: 800 24px 'Nunito'; background: #0005; border-radius: 99px; padding: 8px 18px; }
+.mercato-tel .passo { display: block; width: 100%; margin-top: 10px; border: 0; border-radius: 14px; padding: 14px; font: 900 20px 'Nunito'; color: var(--inchiostro); background: linear-gradient(#ffe08a, var(--oro)); box-shadow: 0 4px 0 var(--oro-scuro); }
+.mercato-tel .passo:active { transform: translateY(3px); box-shadow: none; }
+.mercato-tel .passato { margin-top: 10px; font-weight: 800; background: #0004; border-radius: 12px; padding: 10px; }

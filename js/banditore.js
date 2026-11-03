@@ -417,19 +417,28 @@ export class Banditore {
 
   async mercato(sec, tipo = 'mercato') {
     const S = this.S;
-    S.mercato = { resto: sec, sec };
+    S.mercato = { resto: sec, sec, passo: [] };
+    this.avanti = false;
     this.salva();
     suona('mercato');
     this.di(tipo, { k: sec });
-    const fine = Date.now() + sec * 1000;
-    while (S.mercato && (Date.now() < fine || S.pausa)) {
-      if (this.avanti) { this.avanti = false; break; }
+    let nessuno = false;
+    // il conto alla rovescia lo fa tick(), che si ferma durante la pausa
+    while (S.mercato && S.mercato.resto > 0) {
+      if (this.avanti) { this.avanti = false; nessuno = true; break; }
+      if (this.tuttiPassano()) { nessuno = true; break; }
       await new Promise((r) => setTimeout(r, 100));
     }
     S.mercato = null;
     S.indizio = null;
     this.salva();
-    await this.di('mercatoChiuso');
+    await this.di(nessuno ? 'mercatoNessuno' : 'mercatoChiuso', {}, { interrompi: true });
+  }
+
+  // tutti i giocatori veri hanno detto "non tratto"
+  tuttiPassano() {
+    const veri = Object.entries(this.S.giocatori).filter(([, g]) => !g.bot).map(([u]) => u);
+    return veri.length > 0 && veri.every((u) => this.S.mercato?.passo?.includes(u));
   }
 
   scegliIndizio(id) {
@@ -573,6 +582,8 @@ export class Banditore {
         this.evento('rifiuto', { a: p.da, da: p.a, carta: p.carta });
         this.salva();
       }
+    } else if (q.tipo === 'passo') {
+      if (S.mercato && !S.mercato.passo.includes(q.da)) { S.mercato.passo.push(q.da); this.salva(); }
     } else if (q.tipo === 'copri') {
       // il proprietario copre o scopre le sue carte agli occhi degli altri
       const ids = Array.isArray(q.carte) ? q.carte : [q.carta];

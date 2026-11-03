@@ -125,6 +125,11 @@ export class Telefono {
     const S = this.S, box = this.r.querySelector('#palcoTel');
     let h = '';
     if (S.pausa) h += '<div class="pausa-tel">Il banditore ha messo in pausa</div>';
+    if (S.mercato) {
+      const passato = S.mercato.passo?.includes(this.me);
+      h += `<div class="mercato-tel"><b>Mercato aperto: ${S.mercato.resto}</b><span>tocca una carta per venderla, o una carta degli altri per comprarla</span>
+        ${passato ? '<div class="passato">Hai detto che non tratti: aspetto gli altri...</div>' : '<button class="passo" data-passo="1">Non tratto, avanti!</button>'}</div>`;
+    }
     if (S.fase === 'attesa') {
       const n = Object.keys(S.giocatori).length;
       h += `<div class="aspetta"><h2>Sei al banco!</h2><p>Guarda la TV: quando arrivano tutti, il banditore apre la fiera.</p><p class="piccolo">${n} ${n === 1 ? 'giocatore' : 'giocatori'} al banco</p></div>`;
@@ -141,6 +146,7 @@ export class Telefono {
     box.dataset.h = h;
     box.innerHTML = h;
     box.querySelectorAll('[data-offri]').forEach((b) => { b.onclick = () => this.offri(Number(b.dataset.offri)); });
+    box.querySelectorAll('[data-passo]').forEach((b) => { b.onclick = () => { b.disabled = true; this.manda({ tipo: 'passo' }); }; });
     if (S.fase === 'asta' && S.lotto && S.lotto.tipo === 'buio' && !S.lotto.rivelate) {
       const s = box.querySelector('.lotto-tel');
       if (s) { s.innerHTML = ''; s.appendChild(sacco('piccolo')); }
@@ -181,7 +187,6 @@ export class Telefono {
     const S = this.S, R = S.rosse;
     if (!R) return '<div class="aspetta"><h2>Si contano i soldi...</h2></div>';
     let h = '';
-    if (S.mercato) h += `<div class="mercato-tel"><b>Mercato aperto: ${S.mercato.resto}</b><span>tocca una carta per venderla, o una carta degli altri per comprarla</span></div>`;
     if (S.indizio) h += `<div class="indizio-tel">Sta per uscire <b>${esc(S.indizio)}</b></div>`;
     const ultima = R.svelate[R.svelate.length - 1];
     h += `<div class="premi-tel"><div class="monte"><small>montepremi</small> <b>${euro(S.montepremi)}</b></div>
