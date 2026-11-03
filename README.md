@@ -47,8 +47,8 @@ in corso), **Voce** sì/no, **Schermo intero**. Se la TV si ricarica, *Riprendi 
 
 ## Il banditore
 
-L'avatar è in `avatar/base.webp`. Le pose (saluta, indica, martello, sussurra, festeggia...) si aggiungono come
-`avatar/<posa>.png`: l'elenco completo, con le descrizioni da passare a ChatGPT, è in [AVATAR_POSE.md](AVATAR_POSE.md).
+Le 18 pose dell'avatar (saluta, indica, martello, sussurra, festeggia...) sono in `avatar/<posa>.webp`; `avatar/base.webp`
+è lo sticker originale usato se una posa manca: l'elenco completo, con le descrizioni da passare a ChatGPT, è in [AVATAR_POSE.md](AVATAR_POSE.md).
 Le battute sono in `js/frasi.js` (si possono aggiungere liberamente: `{nome}`, `{carta}`, `{cifra}`, `{k}`, `{indizio}`).
 
 ## Struttura

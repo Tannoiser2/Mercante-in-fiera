@@ -1,8 +1,8 @@
 # Le pose del Banditore (da far disegnare a ChatGPT)
 
-Il gioco cerca le immagini in `avatar/<nome>.png`. Ogni posa che manca viene sostituita dall'avatar base
+Il gioco cerca le immagini in `avatar/<nome>.webp` (i PNG di ChatGPT vanno convertiti in WebP 768 × 960, come quelli già presenti). Ogni posa che manca viene sostituita dall'avatar base
 (`avatar/base.webp`) con un piccolo movimento animato, quindi si possono aggiungere un po' alla volta:
-basta copiare il PNG nella cartella `avatar/` con il nome esatto e pubblicare.
+basta convertire il PNG e copiarlo nella cartella `avatar/` con il nome esatto, poi pubblicare.
 
 ## Indicazioni comuni (da incollare a ChatGPT insieme alla foto/sticker dell'avatar)
 

@@ -59,7 +59,7 @@ export class Telefono {
     localStorage.setItem('mif_ultima', this.codice);
     this.r.innerHTML = `<div class="tel">
       <header class="testa"><div class="io"><span class="pallino"></span><b id="ioNome"></b></div><div class="saldo" id="saldo"></div></header>
-      <div class="detto" id="detto"><img src="avatar/base.webp" alt=""><span></span></div>
+      <div class="detto" id="detto"><img src="avatar/parla.webp" alt=""><span></span></div>
       <section class="palco-tel" id="palcoTel"></section>
       <section class="trattative-tel" id="trattTel"></section>
       <section class="mie"><h3 id="mieTit">Le mie carte</h3><div class="griglia" id="mie"></div><div class="perse" id="perse"></div></section>
@@ -111,6 +111,9 @@ export class Telefono {
     this.r.querySelector('#saldo').innerHTML = S.fase === 'attesa' ? '' : `<span><small>speso</small>${euro(c.posta + c.aste)}</span>${c.scambi ? `<span><small>scambi</small>${(c.scambi > 0 ? '+' : '') + euro(c.scambi)}</span>` : ''}${c.premi ? `<span class="oro"><small>vinto</small>${euro(c.premi)}</span>` : ''}`;
     const d = this.r.querySelector('#detto');
     d.querySelector('span').textContent = S.banditore?.testo || '';
+    const posa = S.banditore?.posa || 'parla';
+    const im = d.querySelector('img');
+    if (im.dataset.posa !== posa) { im.dataset.posa = posa; im.src = `avatar/${posa}.webp`; im.onerror = () => { im.onerror = null; im.src = 'avatar/base.webp'; }; }
     d.classList.toggle('vis', !!S.banditore?.testo);
     this.palco();
     this.trattative();
@@ -452,8 +455,13 @@ export class Telefono {
   vittoria(e) {
     suona('fanfara');
     navigator.vibrate?.([100, 50, 100, 50, 300]);
+    // se vince due premi di fila, la nuova schermata sostituisce la precedente sommando le vincite
+    const prima = document.querySelector('.vittoria');
+    const tot = (prima ? Number(prima.dataset.tot) : 0) + e.v;
+    prima?.remove();
     const v = el('div', 'vittoria');
-    v.innerHTML = `<div class="raggi"></div><h1>HAI VINTO!</h1><div class="cifra">${euro(e.v)}</div>
+    v.dataset.tot = tot;
+    v.innerHTML = `<div class="raggi"></div><h1>HAI VINTO!</h1><div class="cifra">${euro(tot)}</div>
       <img src="${img(e.carta)}" alt=""><p>con ${esc(conArticolo(e.carta))}</p><button class="bottone grande">Evviva!</button>`;
     document.body.appendChild(v);
     coriandoli(6000, 200);

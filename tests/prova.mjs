@@ -15,7 +15,7 @@ await tv.goto(BASE + `?tv&rete=locale&bot=2&veloce=${VEL}`);
 await tv.click('#nuova');
 await tv.waitForSelector('.sala.vis');
 const codice = await tv.evaluate(() => window.banditore.codice);
-console.log('codice', codice);
+console.log('codice', codice, await tv.evaluate(() => window.banditore.S.codice));
 const tel = [];
 for (const nome of ['Stefano', 'Giulia']) {
   const t = await ctx.newPage();
@@ -97,7 +97,7 @@ const S = await tv.evaluate(() => window.banditore.S);
 const tot = Object.values(S.conti).reduce((a, c) => a + c.posta + c.aste, 0);
 const premi = Object.values(S.conti).reduce((a, c) => a + c.premi, 0);
 const scambi = Object.values(S.conti).reduce((a, c) => a + c.scambi, 0);
-console.log('fase finale', S.fase, 'montepremi', S.montepremi, 'raccolto', tot, 'premi pagati', premi, 'riporto', S.rosse?.riporto, 'somma scambi', scambi);
+console.log('codice finale', S.codice, 'fase finale', S.fase, 'montepremi', S.montepremi, 'raccolto', tot, 'premi pagati', premi, 'riporto', S.rosse?.riporto, 'somma scambi', scambi);
 console.log('vincite', JSON.stringify(S.vincite));
 if (S.montepremi !== tot) errori.push('montepremi diverso dal raccolto');
 if (premi + (S.rosse?.riporto || 0) !== tot) errori.push('premi + riporto diverso dal montepremi');

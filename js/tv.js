@@ -22,7 +22,7 @@ export class VistaTV {
     for (const p of POSE) {
       const i = new Image();
       i.onload = () => { this.pose[p] = i.src; };
-      i.src = `avatar/${p}.png`;
+      i.src = `avatar/${p}.webp`;
     }
   }
 
@@ -38,7 +38,7 @@ export class VistaTV {
         <div class="codice-mini" id="codiceMini"></div>
         <div class="banditore" id="banditore">
           <div class="fumetto" id="fumetto"><span></span></div>
-          <div class="avatar-box"><img id="avatar" src="avatar/base.webp" alt="Il banditore"></div>
+          <div class="avatar-box"><img id="avatar" src="avatar/saluta.webp" onerror="this.onerror=null;this.src='avatar/base.webp'" alt="Il banditore"></div>
           <div class="bancone"><div class="targa">BANDITORE</div><div class="martelletto" id="martelletto"><i></i><b></b></div></div>
         </div>
         <main class="palco" id="palco"></main>
@@ -194,9 +194,9 @@ export class VistaTV {
     f.classList.toggle('vis', !!b.testo);
     f.classList.add('pop');
     const a = this.$('avatar');
-    a.src = this.pose[b.posa] || 'avatar/base.webp';
+    a.src = this.pose[b.posa] || this.pose.parla || 'avatar/base.webp';
     const box = a.parentElement;
-    box.className = 'avatar-box posa-' + b.posa + (this.pose[b.posa] ? ' immagine' : '');
+    box.className = 'avatar-box posa-' + b.posa + (this.pose[b.posa] || this.pose.parla ? ' immagine' : '');
     box.classList.remove('parla');
     void box.offsetWidth;
     box.classList.add('parla');
