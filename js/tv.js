@@ -3,14 +3,17 @@ import { CARTA, euro, img, conArticolo } from './dati.js';
 import { el, esc, carta, cartaGirevole, sacco, coriandoli, qrSvg, vola, toast } from './comuni.js';
 import { suona, setVoce, sbloccaAudio, sbloccaVoce, elencoVoci, impostaVoce, voceInUso, parla } from './suoni.js';
 
-const POSE = ['saluta', 'parla', 'indica', 'carta', 'busta', 'sussurra', 'occhiolino', 'ride', 'sorpreso', 'pensa', 'triste',
-  'conta1', 'conta2', 'conta3', 'martello', 'soldi', 'mercato', 'festeggia'];
+// pose che hanno anche un'animazione (video di Kling scontornato, in avatar/anim/)
+const ANIMATE = ['martello', 'parla', 'occhiolino', 'saluta', 'festeggia', 'conta1', 'sussurra', 'triste', 'sorpreso', 'soldi',
+  'carta', 'mercato', 'busta', 'pensa', 'indica', 'ride'];
+// le pose senza animazione usano quella di una posa simile
+const ANIM_SIMILE = { conta2: 'conta1', conta3: 'conta1', attesa: null, triste_b: 'triste', carta_b: 'carta', indica_b: 'indica' };
 
 export class VistaTV {
   constructor(radice) {
     this.r = radice;
     this.b = null; // il banditore (impostato da main.js)
-    this.pose = {}; // pose dell'avatar disponibili come immagine (avatar/<posa>.png)
+    this.animPronte = {}; // animazioni già scaricate
     this.chiavi = {};
     this.costruisci();
     this.cercaPose();
@@ -19,12 +22,18 @@ export class VistaTV {
     this.adatta();
   }
 
+  // scarica in sottofondo le animazioni, una alla volta, così non rallentano l'avvio
   cercaPose() {
-    for (const p of POSE) {
+    const coda = [...ANIMATE];
+    const prossima = () => {
+      const p = coda.shift();
+      if (!p) return;
       const i = new Image();
-      i.onload = () => { this.pose[p] = i.src; };
-      i.src = `avatar/${p}.webp`;
-    }
+      i.onload = () => { this.animPronte[p] = true; setTimeout(prossima, 50); };
+      i.onerror = () => setTimeout(prossima, 50);
+      i.src = `avatar/anim/${p}.webp`;
+    };
+    setTimeout(prossima, 1500);
   }
 
   costruisci() {
@@ -39,7 +48,7 @@ export class VistaTV {
         <div class="codice-mini" id="codiceMini"></div>
         <div class="banditore" id="banditore">
           <div class="fumetto" id="fumetto"><span></span></div>
-          <div class="avatar-box"><img id="avatar" src="avatar/saluta.webp" onerror="this.onerror=null;this.src='avatar/base.webp'" alt="Il banditore"></div>
+          <div class="avatar-box"><div class="figura" id="figura"><img id="avatar" src="avatar/saluta.webp" onerror="this.onerror=null;this.src='avatar/base.webp'" alt="Il banditore"><img id="avatarAnim" class="anim" alt=""></div></div>
           <div class="bancone"><div class="targa">BANDITORE</div><div class="martelletto" id="martelletto"><i></i><b></b></div></div>
         </div>
         <main class="palco" id="palco"></main>
@@ -100,6 +109,8 @@ export class VistaTV {
     this.trattative(S);
     this.risultati(S);
     this.$('pausaTv').classList.toggle('vis', !!S.pausa);
+    if (S.pausa && !this._inPausa) { this._inPausa = true; clearTimeout(this._attesa); this.posa('pausa'); }
+    else if (!S.pausa && this._inPausa) { this._inPausa = false; this.attesa(); }
   }
 
   comandi(S) {
@@ -204,7 +215,7 @@ export class VistaTV {
   }
 
   // ------------------------------------------------------------- banditore
-  banditore(b) {
+  banditore(b, fine) {
     if (!b) return;
     const f = this.$('fumetto');
     if (this.ultimoB === b.n) return;
@@ -214,15 +225,47 @@ export class VistaTV {
     void f.offsetWidth;
     f.classList.toggle('vis', !!b.testo);
     f.classList.add('pop');
-    const a = this.$('avatar');
-    // la posa del momento; se l'immagine manca resta lo sticker originale con un movimento animato
-    const box = a.parentElement;
-    a.onerror = () => { a.onerror = null; a.src = 'avatar/base.webp'; box.classList.remove('immagine'); };
-    a.src = `avatar/${b.posa}.webp`;
-    box.className = 'avatar-box posa-' + b.posa + ' immagine';
-    box.classList.remove('parla');
-    void box.offsetWidth;
-    box.classList.add('parla');
+    this.posa(b.posa, true);
+    // finito di parlare, dopo qualche secondo il banditore si mette in attesa
+    clearTimeout(this._attesa);
+    const n = b.n;
+    Promise.resolve(fine).then(() => {
+      if (this.ultimoB === n) this._attesa = setTimeout(() => this.attesa(), 3500);
+    });
+  }
+
+  // mostra una posa: l'animazione se c'è (e si è già scaricata), altrimenti l'immagine ferma
+  posa(nome, salta = false) {
+    clearInterval(this._ciglia);
+    const box = this.$('figura').parentElement, a = this.$('avatar'), an = this.$('avatarAnim');
+    const animNome = ANIMATE.includes(nome) ? nome : ANIM_SIMILE[nome];
+    a.onerror = () => { a.onerror = null; a.src = 'avatar/base.webp'; };
+    a.src = `avatar/${nome}.webp`;
+    if (animNome && this.animPronte[animNome]) {
+      if (an.dataset.n !== animNome) { an.src = `avatar/anim/${animNome}.webp`; an.dataset.n = animNome; }
+      box.classList.add('animato');
+    } else {
+      box.classList.remove('animato');
+      an.removeAttribute('src');
+      an.dataset.n = '';
+    }
+    box.className = box.className.replace(/\bposa-\S+/g, '').trim() + ' posa-' + nome;
+    if (salta) { box.classList.remove('parla'); void box.offsetWidth; box.classList.add('parla'); }
+  }
+
+  // il banditore aspetta: braccia conserte, ogni tanto sbatte le ciglia o inclina la testa
+  attesa() {
+    if (this.S?.pausa) return;
+    this.posa('attesa');
+    let t = 0;
+    clearInterval(this._ciglia);
+    this._ciglia = setInterval(() => {
+      t++;
+      const a = this.$('avatar');
+      if (t % 7 === 3) { a.src = 'avatar/attesa_occhi.webp'; setTimeout(() => { if (a.src.includes('attesa_occhi')) a.src = 'avatar/attesa.webp'; }, 160); }
+      else if (t % 11 === 6) a.src = 'avatar/attesa_b.webp';
+      else if (t % 11 === 9) a.src = 'avatar/attesa.webp';
+    }, 700);
   }
 
   martello() {

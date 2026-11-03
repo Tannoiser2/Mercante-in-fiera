@@ -58,6 +58,16 @@ in corso), **Voce** sì/no, **Schermo intero**. Se la TV si ricarica, *Riprendi 
 
 ## Il banditore
 
+- **56 pose** (prima e seconda serie fatte con ChatGPT) in `avatar/<posa>.webp`, scelte a seconda del momento:
+  pacchetto per i regali, campanella e orologio per il mercato, lente per gli indizi, "V" della doppietta,
+  carretto pieno di carte per il poker, lacrima per la sfortuna, rullo di tamburi prima del primo premio, inchino finale...
+- **16 animazioni** fatte con Kling (`avatar/anim/<posa>.webp`): video su sfondo verde scontornati e trasformati in
+  WebP animati trasparenti che vanno avanti e indietro senza scatti. Si scaricano in sottofondo dopo l'avvio; finché
+  un'animazione non è pronta si vede la posa ferma. Le immagini di partenza su sfondo verde sono in `kling/`.
+- Quando non parla, il banditore aspetta a braccia conserte, sbatte le ciglia e inclina la testa; in pausa beve la
+  cioccolata.
+- La locandina (`img/locandina.webp`) è la schermata d'avvio sulla TV e sui telefoni e la copertina della ludoteca.
+
 Le 18 pose dell'avatar (saluta, indica, martello, sussurra, festeggia...) sono in `avatar/<posa>.webp`; `avatar/base.webp`
 è lo sticker originale usato se una posa manca: l'elenco completo, con le descrizioni da passare a ChatGPT, è in [AVATAR_POSE.md](AVATAR_POSE.md).
 Le battute (oltre 160, con doppiette, triplette, duelli tra giocatori, rilanci da capogiro, sfortune a ripetizione...) sono in `js/frasi.js` (si possono aggiungere liberamente: `{nome}`, `{carta}`, `{cifra}`, `{k}`, `{indizio}`).

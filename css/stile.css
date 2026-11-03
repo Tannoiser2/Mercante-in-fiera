@@ -400,3 +400,24 @@ img { -webkit-user-drag: none; user-select: none; }
 .mercato-tel .passo { display: block; width: 100%; margin-top: 10px; border: 0; border-radius: 14px; padding: 14px; font: 900 20px 'Nunito'; color: var(--inchiostro); background: linear-gradient(#ffe08a, var(--oro)); box-shadow: 0 4px 0 var(--oro-scuro); }
 .mercato-tel .passo:active { transform: translateY(3px); box-shadow: none; }
 .mercato-tel .passato { margin-top: 10px; font-weight: 800; background: #0004; border-radius: 12px; padding: 10px; }
+
+/* figura del banditore: immagine ferma + animazione sovrapposta (il video ha più margine attorno) */
+.avatar-box .figura { position: relative; height: 100%; aspect-ratio: 4 / 5; }
+.avatar-box .figura > img#avatar { width: 100%; height: 100%; max-width: none; max-height: none; object-fit: contain; }
+.avatar-box .figura > img.anim { position: absolute; left: -17.57%; top: -19.64%; width: 135.27%; height: 135.16%; max-width: none; max-height: none;
+  display: none; filter: drop-shadow(0 12px 18px #000a); pointer-events: none; }
+.avatar-box.animato .figura > img.anim { display: block; }
+.avatar-box.animato .figura > img#avatar { visibility: hidden; }
+
+/* schermata d'avvio */
+.splash { position: fixed; inset: 0; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  background: radial-gradient(circle, #5a0d14, #1c0306 75%); cursor: pointer; transition: opacity .6s; }
+.splash img { max-width: 94vw; max-height: 86vh; border-radius: 18px; box-shadow: 0 0 0 4px var(--oro), 0 20px 60px #000c; animation: splashEntra 1.2s cubic-bezier(.2,.9,.3,1) both; }
+.splash .tocca { font: 700 15px 'Josefin'; letter-spacing: .3em; text-transform: uppercase; color: #ffd9a8; animation: pulsa 1.4s infinite; }
+.splash.via { opacity: 0; pointer-events: none; }
+@keyframes splashEntra { from { transform: scale(.85) rotate(-2deg); opacity: 0; } }
+/* pagina iniziale della TV con la locandina */
+.tv-inizio { flex-direction: row !important; align-items: center; justify-content: center; gap: 4vw; }
+.tv-inizio .locandina { height: 82vh; max-width: 45vw; object-fit: contain; border-radius: 16px; box-shadow: 0 0 0 4px var(--oro), 0 20px 60px #000c; }
+.tv-inizio-destra { width: min(460px, 44vw); }
+@media (max-aspect-ratio: 1/1) { .tv-inizio { flex-direction: column !important; } .tv-inizio .locandina { height: 50vh; max-width: 90vw; } }

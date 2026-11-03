@@ -104,8 +104,9 @@ export class Banditore {
     const f = frase(tipo, dati);
     this.S.banditore = { testo: f.testo, posa: f.posa, n: (this.S.banditore?.n || 0) + 1 };
     this.salva();
-    this.vista.banditore(this.S.banditore);
-    return parla(f.voce, { interrompi });
+    const fine = parla(f.voce, { interrompi });
+    this.vista.banditore(this.S.banditore, fine);
+    return fine;
   }
 
   // Attesa interrompibile: torna true se nel frattempo è arrivata un'offerta (segnale cambiato)

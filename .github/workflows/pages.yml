@@ -26,7 +26,7 @@ jobs:
       - name: Prepara la cartella del sito
         run: |
           mkdir -p sito
-          cp -r index.html css js font carte avatar ludoteca sito/
+          cp -r index.html css js font carte avatar img ludoteca sito/
           touch sito/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:

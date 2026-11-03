@@ -4,6 +4,22 @@ import { esc, schermoAcceso } from './comuni.js';
 import { sbloccaAudio, sbloccaVoce, setVoce, impostaVoce } from './suoni.js';
 
 const q = new URLSearchParams(location.search);
+
+// schermata d'avvio con la locandina: sparisce da sola o al tocco
+function splash() {
+  if (q.has('veloce') || sessionStorage.getItem('mif_splash')) return Promise.resolve();
+  sessionStorage.setItem('mif_splash', '1');
+  return new Promise((ok) => {
+    const d = document.createElement('div');
+    d.className = 'splash';
+    d.innerHTML = '<img src="img/locandina.webp" alt="Mercante in Fiera"><div class="tocca">tocca per entrare</div>';
+    document.body.appendChild(d);
+    let chiusa = false;
+    const chiudi = () => { if (chiusa) return; chiusa = true; d.classList.add('via'); setTimeout(() => d.remove(), 600); ok(); };
+    d.onclick = chiudi;
+    setTimeout(chiudi, 3200);
+  });
+}
 const radice = document.getElementById('app');
 
 function errore(e) {
@@ -24,12 +40,13 @@ async function tv() {
     try { stato = JSON.parse(await rete.get(`mercante/rooms/${salvata}/stato`) || 'null'); } catch (e) { stato = null; }
   }
   const riprendibile = stato && stato.fase !== 'attesa' && stato.fase !== 'fine' && Object.keys(stato.giocatori || {}).length;
-  radice.innerHTML = `<div class="tel benvenuto tv-inizio"><h1>Mercante in Fiera</h1><div class="sotto">la grande fiera di Natale</div>
+  radice.innerHTML = `<div class="tel benvenuto tv-inizio"><img class="locandina" src="img/locandina.webp" alt="">
+    <div class="tv-inizio-destra"><h1>Mercante in Fiera</h1><div class="sotto">la grande fiera di Natale</div>
     <div class="box"><h2>Il banco del banditore</h2>
     <p>Collega questo schermo alla TV, alza il volume e apri il banco.</p>
     <button class="bottone grande" id="nuova">Apri una nuova fiera</button>
     ${riprendibile ? `<button class="bottone" id="riprendi">Riprendi la fiera ${esc(salvata)}</button>` : ''}
-    </div></div>`;
+    </div></div></div>`;
   await new Promise((ok) => {
     const via = (riprendi) => async () => {
       sbloccaAudio(); sbloccaVoce(); schermoAcceso();
@@ -88,6 +105,7 @@ function inizio() {
 
 (async () => {
   try {
+    await splash();
     if (q.has('tv')) await tv();
     else if (q.get('s')) await telefono(q.get('s'));
     else inizio();

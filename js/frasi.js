@@ -271,10 +271,24 @@ const VARIANTI = {
 };
 for (const [k, l] of Object.entries(VARIANTI)) FRASI[k] = (FRASI[k] || []).concat(l);
 
+// pose della seconda serie: per questi momenti il banditore sceglie tra queste
+const POSE_MOMENTO = {
+  inizio: ['pergamena', 'soldi'], regalo: ['regalo'], lottoScopertoN: ['megafono', 'carta'],
+  silenzio1: ['orecchio', 'sbadiglio', 'sorpreso'], indizio: ['sussurra', 'lente'],
+  mercato: ['mercato', 'campanella'], ultimoMercato: ['orologio', 'campanella'], mercatoChiuso: ['orologio', 'martello'],
+  mercatoNessuno: ['attesa', 'pensa'], doppietta: ['doppietta'], tripletta: ['tripletta'], poker: ['carretto'],
+  duello: ['duello'], rilancioGrosso: ['wow'], prezzoAlto: ['soldi_pioggia', 'wow'], affare: ['affare'],
+  sfortunaDoppia: ['lacrima'], sfortunaTripla: ['disperato'], maniVuote: ['abbraccio'], pochi: ['tensione'],
+  scambioProposto: ['pensieroso'], scambioFatto: ['stretta', 'affare'], premi: ['busta_premio'],
+  fineAsta: ['soldi', 'soldi_pioggia'], finale: ['tensione', 'pensa'], granPremio: ['rullo'],
+  vince: ['festeggia', 'trofeo', 'applaude'], fine: ['inchino', 'brindisi'],
+};
+
 export function frase(tipo, dati = {}) {
   const l = FRASI[tipo];
   const [t, posa] = l[Math.floor(Math.random() * l.length)];
-  return { testo: riempi(t, dati), voce: riempiVoce(t, dati), posa };
+  const alt = POSE_MOMENTO[tipo];
+  return { testo: riempi(t, dati), voce: riempiVoce(t, dati), posa: alt ? alt[Math.floor(Math.random() * alt.length)] : posa };
 }
 export function riempi(t, d) {
   const s = t.replace(/\{(\w+)\}/g, (_, k) => (d[k] !== undefined ? d[k] : ''));
