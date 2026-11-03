@@ -34,7 +34,7 @@ export class Banditore {
     const cfg = { ...CFG_BASE, ...(JSON.parse(localStorage.getItem('mif_cfg') || '{}')) };
     this.S = {
       v: 1, codice, fase: 'attesa', cfg, giocatori: {}, conti: {}, nere: {}, mazzo: [], tentativi: {}, eliminate: [],
-      lotto: null, nLotti: 0, rosse: null, mercato: null, indizio: null, proposte: {}, vincite: [],
+      coperte: {}, lotto: null, nLotti: 0, rosse: null, mercato: null, indizio: null, proposte: {}, vincite: [],
       banditore: { testo: '', posa: 'saluta', n: 0 }, ev: [], evn: 0, pausa: false, montepremi: 0,
     };
     localStorage.setItem('mif_tv', codice);
@@ -51,6 +51,7 @@ export class Banditore {
     this.codice = codice;
     this.S = JSON.parse(st);
     this.S.mercato = null;
+    this.S.coperte = this.S.coperte || {};
     this.ascolta();
     this.vista.tutto(this.S);
     if (this.S.fase !== 'attesa' && this.S.fase !== 'fine') this.regia();
@@ -137,6 +138,7 @@ export class Banditore {
       for (let i = 0; i < S.cfg.regalo && S.mazzo.length; i++) {
         const id = S.mazzo.shift();
         S.nere[id] = uid;
+        S.coperte[id] = true;
         this.evento('regalo', { uid, carte: [id] });
       }
     }
@@ -177,7 +179,7 @@ export class Banditore {
     if (S.fase !== 'attesa' || Object.keys(S.giocatori).length < 1) return;
     S.fase = 'regali';
     S.mazzo = mescola(CARTE.map((c) => c.id));
-    S.nere = {}; S.eliminate = []; S.tentativi = {}; S.vincite = []; S.proposte = {};
+    S.nere = {}; S.coperte = {}; S.eliminate = []; S.tentativi = {}; S.vincite = []; S.proposte = {};
     for (const uid of Object.keys(S.giocatori)) S.conti[uid] = { posta: S.cfg.posta, aste: 0, scambi: 0, premi: 0 };
     this.salva();
     this.regia();
@@ -186,7 +188,7 @@ export class Banditore {
   async nuovaPartita() {
     const S = this.S;
     S.fase = 'attesa'; S.lotto = null; S.rosse = null; S.mercato = null; S.indizio = null; S.nLotti = 0;
-    S.nere = {}; S.eliminate = []; S.vincite = []; S.proposte = {}; S.montepremi = 0;
+    S.nere = {}; S.coperte = {}; S.eliminate = []; S.vincite = []; S.proposte = {}; S.montepremi = 0;
     for (const uid of Object.keys(S.conti)) S.conti[uid] = { posta: 0, aste: 0, scambi: 0, premi: 0 };
     this.salva();
     this.vista.tutto(S);
@@ -218,6 +220,7 @@ export class Banditore {
           if (!S.mazzo.length) break;
           const id = S.mazzo.shift();
           S.nere[id] = uid;
+          S.coperte[id] = true; // la carta in regalo la vede solo chi la riceve
           this.evento('regalo', { uid, carte: [id] });
           await this.attendi(900);
         }
@@ -337,18 +340,15 @@ export class Banditore {
     L.conta = 3;
     const { uid, v } = L.migliore;
     S.conti[uid].aste += v;
-    for (const id of L.carte) S.nere[id] = uid;
+    for (const id of L.carte) {
+      S.nere[id] = uid;
+      // le carte comprate coperte o al buio restano coperte agli altri
+      if (L.tipo === 'scoperta') delete S.coperte[id]; else S.coperte[id] = true;
+    }
     this.salva();
     suona('martello');
     this.vista.martello();
     await this.di('conta3', {}, { interrompi: true });
-    if (!L.rivelate) {
-      L.rivelate = true;
-      this.salva();
-      this.vista.rivela(L, S);
-      await this.di('scoperta');
-      await this.attendi(1200);
-    }
     this.di('aggiudicato', { nome: this.nome(uid), cifra: v });
     await this.attendi(500);
     this.evento('aggiudicato', { uid, carte: L.carte, v, lotto: L.id });
@@ -449,6 +449,7 @@ export class Banditore {
         await this.attendi(900);
         if (u) {
           S.eliminate.push(id);
+          delete S.coperte[id];
           for (const [pid, p] of Object.entries(S.proposte)) if (p.carta === id) delete S.proposte[pid];
           this.evento('eliminata', { uid: u, carta: id });
           suona('peccato');
@@ -474,6 +475,7 @@ export class Banditore {
       const id = R.vincenti[i];
       const premio = R.premi[i] + R.riporto;
       R.premiate.push(id);
+      delete S.coperte[id];
       const u = this.proprietario(id);
       suona('gira');
       this.evento('svelaPremio', { carta: id, i, v: premio, uid: u });
@@ -533,6 +535,14 @@ export class Banditore {
         this.evento('rifiuto', { a: p.da, da: p.a, carta: p.carta });
         this.salva();
       }
+    } else if (q.tipo === 'copri') {
+      // il proprietario copre o scopre le sue carte agli occhi degli altri
+      const ids = Array.isArray(q.carte) ? q.carte : [q.carta];
+      for (const id of ids) {
+        if (!CARTA[id] || this.proprietario(id) !== q.da) continue;
+        if (q.v) S.coperte[id] = true; else delete S.coperte[id];
+      }
+      this.salva();
     } else if (q.tipo === 'ritira') {
       const p = S.proposte[q.pid];
       if (p && p.da === q.da) { delete S.proposte[q.pid]; this.salva(); }

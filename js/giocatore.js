@@ -62,7 +62,7 @@ export class Telefono {
       <div class="detto" id="detto"><img src="avatar/parla.webp" alt=""><span></span></div>
       <section class="palco-tel" id="palcoTel"></section>
       <section class="trattative-tel" id="trattTel"></section>
-      <section class="mie"><h3 id="mieTit">Le mie carte</h3><div class="griglia" id="mie"></div><div class="perse" id="perse"></div></section>
+      <section class="mie"><div class="mie-testa"><h3 id="mieTit">Le mie carte</h3><div class="copri-tutte" id="copriTutte"></div></div><div class="griglia" id="mie"></div><div class="perse" id="perse"></div></section>
       <section class="tavolo"><h3>Le carte degli altri</h3><div id="tavolo"></div></section>
       <div class="scollegato-avviso">Connessione persa... riprovo</div>
     </div>
@@ -150,7 +150,7 @@ export class Telefono {
   htmlAsta() {
     const S = this.S, L = S.lotto;
     if (!L) return '<div class="aspetta"><h2>Asta in corso</h2><p>Il banditore prepara il prossimo lotto...</p></div>';
-    const tipi = { scoperta: L.k > 1 ? `${L.k} carte` : '1 carta', coperta: `${L.k} carte coperte`, buio: 'al buio: chissà quante!' };
+    const tipi = { scoperta: L.k > 1 ? `${L.k} carte` : '1 carta', coperta: L.k > 1 ? `${L.k} carte coperte` : '1 carta coperta', buio: 'al buio: chissà quante!' };
     let carte = '';
     if (L.tipo === 'buio' && !L.rivelate) carte = '';
     else carte = L.carte.map((id) => `<img class="c" src="${img(L.rivelate ? id : 'dorso_nero', true)}" alt="">`).join('');
@@ -208,16 +208,30 @@ export class Telefono {
     </div>`;
   }
 
+  coperta(id) { return !!this.S.coperte?.[id]; }
+  copri(carte, v) { if (carte.length) this.manda({ tipo: 'copri', carte, v }); }
+
   mie() {
     const v = this.vive(this.me), pe = this.perse(this.me);
     const box = this.r.querySelector('#mie');
-    const k = v.join() + '|' + this.S.fase;
+    const k = v.map((id) => id + (this.coperta(id) ? '*' : '')).join() + '|' + this.S.fase;
+    const ct = this.r.querySelector('#copriTutte');
+    const scoperte = v.filter((id) => !this.coperta(id)), coperte = v.filter((id) => this.coperta(id));
+    const hct = v.length && this.S.fase !== 'fine' ? (scoperte.length ? '<button data-tutte="1">copri tutte</button>' : '') + (coperte.length ? '<button data-tutte="0">mostra tutte</button>' : '') : '';
+    if (ct.dataset.h !== hct) {
+      ct.dataset.h = hct;
+      ct.innerHTML = hct;
+      ct.querySelectorAll('[data-tutte]').forEach((b) => {
+        b.onclick = () => { const cop = b.dataset.tutte === '1'; this.copri(cop ? this.vive(this.me).filter((id) => !this.coperta(id)) : this.vive(this.me).filter((id) => this.coperta(id)), cop); };
+      });
+    }
     this.r.querySelector('#mieTit').textContent = v.length ? `Le mie carte (${v.length})` : 'Le mie carte';
     if (box.dataset.k !== k) {
       box.dataset.k = k;
       box.innerHTML = v.length ? '' : '<p class="vuoto">Ancora nessuna carta: fai un\'offerta!</p>';
       for (const id of v) {
-        const c = carta(id, { mini: true, cls: 'mia' });
+        const c = carta(id, { mini: true, cls: 'mia' + (this.coperta(id) ? ' nascosta' : '') });
+        if (this.coperta(id)) c.insertAdjacentHTML('beforeend', '<span class="bollino">coperta</span>');
         c.onclick = () => this.foglioVendi(id);
         box.appendChild(c);
       }
@@ -234,7 +248,7 @@ export class Telefono {
     const S = this.S;
     const gs = Object.entries(S.giocatori).filter(([u]) => u !== this.me).sort((a, b) => a[1].ord - b[1].ord);
     const box = this.r.querySelector('#tavolo');
-    const k = JSON.stringify(gs.map(([u]) => [u, this.vive(u)])) + S.fase;
+    const k = JSON.stringify(gs.map(([u]) => [u, this.vive(u).map((id) => (this.coperta(id) ? '?' + id : id))])) + S.fase;
     if (box.dataset.k === k) return;
     box.dataset.k = k;
     box.innerHTML = gs.length ? '' : '<p class="vuoto">Nessun altro al banco</p>';
@@ -246,7 +260,7 @@ export class Telefono {
       const v = this.vive(u);
       if (!v.length) cc.innerHTML = '<em>nessuna carta</em>';
       for (const id of v) {
-        const c = carta(id, { mini: true });
+        const c = this.coperta(id) ? carta(null, { mini: true, dorso: 'nero' }) : carta(id, { mini: true });
         c.onclick = () => this.foglioCompra(id, u);
         cc.appendChild(c);
       }
@@ -259,7 +273,8 @@ export class Telefono {
     const S = this.S;
     const mie = Object.entries(S.proposte || {}).filter(([, p]) => p.da === this.me);
     const box = this.r.querySelector('#trattTel');
-    const h = mie.map(([pid, p]) => `<div class="tr"><img src="${img(p.carta, true)}" alt=""><span>${p.modo === 'vendo' ? 'Offri' : 'Chiedi'} ${esc(conArticolo(p.carta))} a <b>${esc(S.giocatori[p.a]?.nome || '')}</b> per ${euro(p.prezzo)}<br><small>aspetto la risposta...</small></span><button data-ritira="${pid}">ritira</button></div>`).join('');
+    const vis = (p) => p.modo === 'compro' && this.coperta(p.carta);
+    const h = mie.map(([pid, p]) => `<div class="tr"><img src="${img(vis(p) ? 'dorso_nero' : p.carta, true)}" alt=""><span>${p.modo === 'vendo' ? 'Offri' : 'Chiedi'} ${vis(p) ? 'una carta coperta' : esc(conArticolo(p.carta))} a <b>${esc(S.giocatori[p.a]?.nome || '')}</b> per ${euro(p.prezzo)}<br><small>aspetto la risposta...</small></span><button data-ritira="${pid}">ritira</button></div>`).join('');
     if (box.dataset.h === h) return;
     box.dataset.h = h;
     box.innerHTML = h;
@@ -307,10 +322,14 @@ export class Telefono {
   foglioVendi(id) {
     const S = this.S;
     const altri = Object.entries(S.giocatori).filter(([u]) => u !== this.me).sort((a, b) => a[1].ord - b[1].ord);
-    if (!this.puoTrattare()) { this.foglio(`<img class="grande" src="${img(id)}" alt=""><h3>${esc(CARTA[id].nome)}</h3>`); return; }
-    this.foglio(`<img class="grande" src="${img(id)}" alt=""><h3>Vendi ${esc(conArticolo(id))}</h3>
+    const cop = this.coperta(id);
+    const interr = `<button class="interruttore ${cop ? 'on' : ''}" id="copriUna">${cop ? 'Coperta: gli altri non la vedono' : 'Scoperta: gli altri la vedono'}<small>${cop ? 'tocca per mostrarla' : 'tocca per coprirla'}</small></button>`;
+    const legaCopri = (v) => { v.querySelector('#copriUna').onclick = () => { this.copri([id], !cop); this.chiudiFoglio(); }; };
+    if (!this.puoTrattare()) { this.foglio(`<img class="grande" src="${img(id)}" alt=""><h3>${esc(CARTA[id].nome)}</h3>${this.S.fase === 'fine' ? '' : interr}`, (v) => v.querySelector('#copriUna') && legaCopri(v)); return; }
+    this.foglio(`<img class="grande" src="${img(id)}" alt="">${interr}<h3>Vendi ${esc(conArticolo(id))}</h3>
       <p>A chi la vuoi proporre?</p><div class="scegli">${altri.map(([u, g]) => `<button data-u="${u}" style="--c:${g.colore}">${esc(g.nome)}</button>`).join('') || '<em>nessun altro giocatore</em>'}</div>
       <p>A che prezzo?</p>${this.prezzoHtml()}<button class="bottone grande" id="proponi" disabled>Proponi</button>`, (v) => {
+      legaCopri(v);
       let chi = null;
       const prezzo = this.legaPrezzo(v, 100);
       v.querySelectorAll('[data-u]').forEach((b) => {
@@ -327,8 +346,10 @@ export class Telefono {
 
   foglioCompra(id, u) {
     const S = this.S, g = S.giocatori[u];
-    if (!this.puoTrattare()) { this.foglio(`<img class="grande" src="${img(id)}" alt=""><h3>${esc(CARTA[id].nome)}</h3><p>di ${esc(g.nome)}</p>`); return; }
-    this.foglio(`<img class="grande" src="${img(id)}" alt=""><h3>Compra ${esc(conArticolo(id))}</h3><p>da <b style="color:${g.colore}">${esc(g.nome)}</b>: quanto offri?</p>
+    const cop = this.coperta(id);
+    const im = img(cop ? 'dorso_nero' : id), nome = cop ? 'una carta coperta' : conArticolo(id);
+    if (!this.puoTrattare()) { this.foglio(`<img class="grande" src="${im}" alt=""><h3>${esc(cop ? 'Carta coperta' : CARTA[id].nome)}</h3><p>di ${esc(g.nome)}</p>`); return; }
+    this.foglio(`<img class="grande" src="${im}" alt=""><h3>Compra ${esc(nome)}</h3>${cop ? '<p class="piccolo">Non sai che carta è: compri a scatola chiusa!</p>' : ''}<p>da <b style="color:${g.colore}">${esc(g.nome)}</b>: quanto offri?</p>
       ${this.prezzoHtml()}<button class="bottone grande" id="proponi">Fai l'offerta</button>`, (v) => {
       const prezzo = this.legaPrezzo(v, 100);
       v.querySelector('#proponi').onclick = () => {
@@ -353,10 +374,11 @@ export class Telefono {
     if (!g) return;
     suona('arrivo');
     navigator.vibrate?.([60, 40, 60]);
+    const nascosta = p.modo === 'vendo' && this.coperta(p.carta);
     const testo = p.modo === 'vendo'
-      ? `<b style="color:${g.colore}">${esc(g.nome)}</b> ti vuole vendere <b>${esc(conArticolo(p.carta))}</b> per <b>${p.prezzo ? euro(p.prezzo) : 'niente (regalo!)'}</b>`
+      ? `<b style="color:${g.colore}">${esc(g.nome)}</b> ti vuole vendere <b>${nascosta ? 'una carta coperta' : esc(conArticolo(p.carta))}</b> per <b>${p.prezzo ? euro(p.prezzo) : 'niente (regalo!)'}</b>`
       : `<b style="color:${g.colore}">${esc(g.nome)}</b> vuole comprare <b>${esc(conArticolo(p.carta))}</b> per <b>${p.prezzo ? euro(p.prezzo) : 'niente'}</b>`;
-    this.foglio(`<div class="proposta"><h3>Una proposta!</h3><img class="grande" src="${img(p.carta)}" alt=""><p>${testo}</p>
+    this.foglio(`<div class="proposta"><h3>Una proposta!</h3><img class="grande" src="${img(nascosta ? 'dorso_nero' : p.carta)}" alt=""><p>${testo}</p>
       <div class="sino"><button class="no" id="no">No grazie</button><button class="si" id="si">Affare fatto!</button></div></div>`, (v) => {
       this.foglioAperto = pid;
       const rispondi = (ok) => { this.risposte.add(pid); this.manda({ tipo: 'rispondi', pid, ok }); this.chiudiFoglio(); };

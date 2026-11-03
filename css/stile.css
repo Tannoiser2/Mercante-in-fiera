@@ -246,12 +246,12 @@ img { -webkit-user-drag: none; user-select: none; }
 .titolo-palco { text-align: center; font: 700 26px 'Josefin'; letter-spacing: .25em; text-transform: uppercase; color: #ffd9a8; margin-bottom: 18px; }
 .titolo-palco .tipo { display: inline-block; margin-left: 12px; padding: 4px 14px 2px; border-radius: 8px; background: var(--oro); color: var(--inchiostro); letter-spacing: .1em; }
 .tipo-coperta { background: #e8d9b5 !important; } .tipo-buio { background: #222 !important; color: var(--oro) !important; }
-.mazzo-centro { position: relative; width: 300px; height: 420px; margin: 40px auto; }
+.mazzo-centro { position: relative; width: 360px; height: 503px; margin: 30px auto; }
 .mazzo-centro .carta { position: absolute; inset: 0; }
-.lotto { display: flex; justify-content: center; align-items: center; gap: 24px; height: 560px; }
-.carta.grande { width: 330px; flex: none; }
-.lotto.n2 .carta.grande { width: 300px; } .lotto.n3 .carta.grande { width: 250px; } .lotto.n4 .carta.grande { width: 196px; }
-.lotto.n1 .carta.orizz, .lotto.n1 .carta.girevole.orizz { transform: rotate(90deg); width: 380px; }
+.lotto { display: flex; justify-content: center; align-items: center; gap: 24px; height: 600px; }
+.carta.grande { width: 400px; flex: none; }
+.lotto.n2 .carta.grande { width: 360px; } .lotto.n3 .carta.grande { width: 270px; } .lotto.n4 .carta.grande { width: 200px; }
+.lotto.n1 .carta.orizz, .lotto.n1 .carta.girevole.orizz { transform: rotate(90deg); width: 430px; }
 .carta.entra { animation: entraCarta .6s both; }
 .carta.esce { animation: esceSacco .6s both; }
 @keyframes entraCarta { from { transform: translateY(-60px) rotate(-8deg) scale(.7); opacity: 0; } }
@@ -284,7 +284,7 @@ img { -webkit-user-drag: none; user-select: none; }
 .pannello .monte { font: 70px/1.1 'Rye'; color: var(--oro); text-shadow: 0 5px 0 #3d050b; margin-bottom: 12px; }
 .premi { display: flex; flex-direction: column; gap: 10px; }
 .premio { display: flex; align-items: center; gap: 14px; background: #0004; border-radius: 14px; padding: 8px 12px; text-align: left; border: 3px solid #0000; }
-.premio .pc { width: 56px; flex: none; perspective: 600px; }
+.premio .pc { width: 64px; flex: none; perspective: 600px; }
 .premio .pc img { width: 100%; border-radius: 5px; display: block; box-shadow: 0 3px 8px #0008; }
 .premio .pv b { font: 900 32px 'Nunito'; display: block; line-height: 1; }
 .premio .pv small { font: 600 14px 'Josefin'; letter-spacing: .15em; text-transform: uppercase; color: #ffd9a8; }
@@ -294,16 +294,17 @@ img { -webkit-user-drag: none; user-select: none; }
 .premio.fatto { opacity: .65; } .premio.vinto { opacity: 1; border-color: var(--c); background: #0006; }
 @keyframes entraDestra { from { transform: translateX(300px); opacity: 0; } }
 
-.ultime { display: flex; justify-content: center; align-items: center; gap: 30px; height: 470px; }
+.ultime { display: flex; justify-content: center; align-items: center; gap: 28px; height: 480px; }
 .ultima { position: relative; }
-.ultima .carta.grande { width: 270px; }
-.ultima.premio-grande .carta.grande { width: 320px; }
+.ultima .carta.grande { width: 265px; }
+.ultime.n1 .ultima .carta.grande { width: 340px; } .ultime.n2 .ultima .carta.grande { width: 320px; }
+.ultime .ultima.premio-grande .carta.grande { width: 340px; }
 .nastro { position: absolute; left: -30px; right: -30px; top: 44%; background: var(--c); color: #fff; font: 900 30px 'Nunito'; text-align: center; padding: 8px 4px; transform: rotate(-8deg); box-shadow: 0 6px 16px #0008; text-shadow: 0 2px 3px #0008; animation: timbraN .35s both; border: 3px solid #fff; border-radius: 6px; }
 .nastro.oro { background: linear-gradient(#ffe08a, var(--oro)); color: var(--inchiostro); text-shadow: none; border-color: var(--c); border-width: 5px; }
 @keyframes timbraN { from { transform: rotate(-8deg) scale(2.5); opacity: 0; } }
 .cartellino { position: absolute; left: 50%; bottom: -26px; transform: translateX(-50%); background: linear-gradient(#ffe08a, var(--oro)); color: var(--inchiostro); font: 900 40px 'Nunito'; padding: 4px 26px; border-radius: 14px; box-shadow: 0 6px 16px #0008; white-space: nowrap; }
-.storia { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin-top: 34px; max-height: 122px; overflow: hidden; }
-.storia-c { width: 40px; border-radius: 4px; opacity: .85; animation: entraCarta .4s both; }
+.storia { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin-top: 26px; max-height: 70px; overflow: hidden; }
+.storia-c { width: 48px; border-radius: 4px; opacity: .85; animation: entraCarta .4s both; }
 .storia-c.colpita { box-shadow: 0 0 0 3px var(--c); opacity: 1; }
 .banner-mercato { position: absolute; left: 20px; right: 20px; top: 50px; z-index: 12; background: linear-gradient(#2e8b57, var(--verde)); border: 5px solid var(--oro); border-radius: 26px; padding: 18px; text-align: center; box-shadow: 0 16px 40px #000b; animation: pop .4s; }
 .banner-mercato .mercato-t { font: 60px 'Rye'; color: var(--oro); text-shadow: 0 4px 0 #0f3320; }
@@ -314,14 +315,14 @@ img { -webkit-user-drag: none; user-select: none; }
 .trattative { position: absolute; left: 600px; width: 860px; top: 828px; z-index: 7; display: flex; flex-direction: column; gap: 4px; align-items: center; }
 .tratt { display: flex; align-items: center; gap: 10px; background: #000a; border-radius: 99px; padding: 4px 18px 4px 6px; font: 700 21px 'Nunito'; animation: sale .3s; }
 .tratt img { width: 30px; border-radius: 3px; }
-.giocatori { position: absolute; left: 30px; right: 30px; bottom: 16px; height: 150px; z-index: 8; display: flex; gap: 12px; justify-content: center; align-items: stretch; }
-.chip { flex: 1 1 0; max-width: 300px; min-width: 0; background: linear-gradient(#000a, #0006); border: 3px solid var(--c); border-radius: 18px; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; position: relative; }
+.giocatori { position: absolute; left: 30px; right: 30px; bottom: 12px; height: 160px; z-index: 8; display: flex; gap: 12px; justify-content: center; align-items: stretch; }
+.chip { flex: 1 1 0; max-width: 320px; min-width: 0; background: linear-gradient(#000a, #0006); border: 3px solid var(--c); border-radius: 18px; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; position: relative; }
 .chip .nome { font: 900 25px 'Nunito'; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .giocatori.n9 .chip .nome, .giocatori.n10 .chip .nome, .giocatori.n11 .chip .nome, .giocatori.n12 .chip .nome { font-size: 19px; }
 .chip .manina { display: flex; align-items: center; flex: 1; min-height: 0; overflow: hidden; }
-.chip .manina img { width: 56px; height: 78px; border-radius: 4px; margin-right: var(--m, 4px); box-shadow: 2px 0 6px #000a; flex: none; }
+.chip .manina img { width: 64px; height: 89px; border-radius: 4px; margin-right: var(--m, 4px); box-shadow: 2px 0 6px #000a, 0 0 0 1px #fff8; flex: none; }
 .chip .manina img:last-of-type { margin-right: 0; }
-.giocatori.n8 .chip .manina img, .giocatori.n9 .chip .manina img, .giocatori.n10 .chip .manina img, .giocatori.n11 .chip .manina img, .giocatori.n12 .chip .manina img { width: 46px; height: 64px; }
+.giocatori.n8 .chip .manina img, .giocatori.n9 .chip .manina img, .giocatori.n10 .chip .manina img, .giocatori.n11 .chip .manina img, .giocatori.n12 .chip .manina img { width: 50px; height: 70px; }
 .chip .quante { margin-left: auto; float: right; background: var(--c); color: #fff; border-radius: 99px; padding: 0 10px; font-size: 20px; text-shadow: 0 1px 2px #0008; }
 .chip .nome { display: flex; align-items: center; }
 .chip .manina em { margin-left: 8px; font-weight: 800; font-size: 20px; font-style: normal; } .chip .manina em.nulla { margin-left: 0; opacity: .5; font-size: 16px; }
@@ -371,3 +372,13 @@ img { -webkit-user-drag: none; user-select: none; }
 .sala-cfg .voce-riga select { flex: 2; min-width: 0; font: 700 17px 'Nunito'; padding: 8px; border-radius: 10px; border: 2px solid var(--oro-scuro); background: #fff; color: var(--inchiostro); }
 .sala-cfg .voce-riga span { flex: 0 0 auto; margin-right: 4px; }
 .sala-cfg .voce-riga em { flex: 2; font-size: 16px; opacity: .7; }
+
+.mie-testa { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.copri-tutte { display: flex; gap: 6px; }
+.copri-tutte button { border: 2px solid #f2c14e99; background: #0004; color: var(--crema); border-radius: 99px; padding: 6px 12px; font-weight: 800; font-size: 13px; }
+.griglia .carta.nascosta img { filter: brightness(.75) saturate(.6); }
+.carta .bollino { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-12deg); background: #1c1c1cdd; color: var(--oro); border: 2px solid var(--oro);
+  font: 700 12px 'Josefin'; letter-spacing: .12em; text-transform: uppercase; padding: 4px 8px 2px; border-radius: 6px; white-space: nowrap; }
+.interruttore { display: block; width: 100%; margin: 10px 0 4px; border: 3px solid #b9a77f; background: #fff; color: var(--inchiostro); border-radius: 14px; padding: 10px; font: 800 16px 'Nunito'; }
+.interruttore small { display: block; font-weight: 600; font-size: 12px; opacity: .7; }
+.interruttore.on { background: #2b2b2b; color: var(--oro); border-color: var(--oro); }

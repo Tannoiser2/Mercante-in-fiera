@@ -260,7 +260,7 @@ export class VistaTV {
           <div class="ultime" id="ultime"></div>
           <div class="storia" id="storia"></div>`;
         const st = p.querySelector('#storia');
-        for (const id of S.rosse?.svelate || []) st.appendChild(this.miniStoria(id, S));
+        for (const id of (S.rosse?.svelate || []).slice(-16)) st.appendChild(this.miniStoria(id, S));
         this.chiavi.mercato = '';
       }
       this.mercatoBox(S);
@@ -291,7 +291,7 @@ export class VistaTV {
   lotto(L, S, ridisegna = false) {
     if (!ridisegna) { this.palco(S); return; }
     const p = this.$('palco');
-    const tipi = { scoperta: L.k > 1 ? `${L.k} carte scoperte` : 'carta scoperta', coperta: `${L.k} carte coperte`, buio: 'asta al buio' };
+    const tipi = { scoperta: L.k > 1 ? `${L.k} carte scoperte` : 'carta scoperta', coperta: L.k > 1 ? `${L.k} carte coperte` : '1 carta coperta', buio: 'asta al buio' };
     p.innerHTML = `<div class="titolo-palco">Lotto n. ${L.id} <span class="tipo tipo-${L.tipo}">${tipi[L.tipo]}</span></div><div class="lotto lotto-${L.tipo} n${L.k}" id="lottoCarte"></div>
       <div class="timbro" id="timbro"></div>`;
     const box = p.querySelector('#lottoCarte');
@@ -388,20 +388,21 @@ export class VistaTV {
     const gs = Object.entries(S.giocatori).sort((a, b) => a[1].ord - b[1].ord);
     const box = this.$('giocatori');
     if (S.fase === 'attesa') { box.innerHTML = ''; this.chiavi.gioc = ''; return; }
-    const k = JSON.stringify(gs.map(([u, g]) => [u, g.nome, this.vive(S, u)]));
+    const k = JSON.stringify([gs.map(([u, g]) => [u, g.nome, this.vive(S, u)]), S.coperte]);
     if (this.chiavi.gioc === k) return;
     this.chiavi.gioc = k;
     box.className = 'giocatori n' + Math.min(gs.length, 12);
     box.innerHTML = gs.map(([u, g]) => {
       const v = this.vive(S, u);
       // le carte si sovrappongono quanto basta per stare nel riquadro
-      const larg = Math.min(300, (1860 - 12 * (gs.length - 1)) / gs.length) - 26;
-      const cw = gs.length >= 8 ? 46 : 56;
+      const larg = Math.min(320, (1860 - 12 * (gs.length - 1)) / gs.length) - 26;
+      const cw = gs.length >= 8 ? 50 : 64;
+      v.sort((x, y) => (S.coperte?.[x] ? 1 : 0) - (S.coperte?.[y] ? 1 : 0));
       const vis = v.slice(0, 14);
       const m = vis.length > 1 ? Math.min(4, (larg - (v.length > 14 ? 40 : 0) - cw) / (vis.length - 1) - cw) : 0;
       return `<div class="chip" data-uid="${u}" style="--c:${g.colore};--m:${m}px">
         <div class="nome"><span class="pallino"></span>${esc(g.nome)}${v.length ? `<span class="quante">${v.length}</span>` : ''}</div>
-        <div class="manina">${vis.map((id) => `<img src="${img(id, true)}" data-id="${id}" alt="">`).join('')}${v.length > 14 ? `<em>+${v.length - 14}</em>` : ''}${v.length ? '' : '<em class="nulla">nessuna carta</em>'}</div>
+        <div class="manina">${vis.map((id) => `<img src="${img(S.coperte?.[id] ? 'dorso_nero' : id, true)}" data-id="${id}" alt="">`).join('')}${v.length > 14 ? `<em>+${v.length - 14}</em>` : ''}${v.length ? '' : '<em class="nulla">nessuna carta</em>'}</div>
       </div>`;
     }).join('');
   }
@@ -410,13 +411,14 @@ export class VistaTV {
   trattative(S) {
     const box = this.$('trattative');
     const ps = Object.values(S.proposte || {}).slice(-3);
+    const nomeC = (id) => (S.coperte?.[id] ? 'una carta coperta' : esc(conArticolo(id)));
     const h = ps.map((p) => {
       const da = S.giocatori[p.da], a = S.giocatori[p.a];
       if (!da || !a) return '';
       const testo = p.modo === 'vendo'
-        ? `<b style="color:${da.colore}">${esc(da.nome)}</b> offre ${esc(conArticolo(p.carta))} a <b style="color:${a.colore}">${esc(a.nome)}</b> per ${euro(p.prezzo)}`
-        : `<b style="color:${da.colore}">${esc(da.nome)}</b> vuole ${esc(conArticolo(p.carta))} di <b style="color:${a.colore}">${esc(a.nome)}</b> per ${euro(p.prezzo)}`;
-      return `<div class="tratt"><img src="${img(p.carta, true)}" alt="">${testo}</div>`;
+        ? `<b style="color:${da.colore}">${esc(da.nome)}</b> offre ${nomeC(p.carta)} a <b style="color:${a.colore}">${esc(a.nome)}</b> per ${euro(p.prezzo)}`
+        : `<b style="color:${da.colore}">${esc(da.nome)}</b> vuole ${nomeC(p.carta)} di <b style="color:${a.colore}">${esc(a.nome)}</b> per ${euro(p.prezzo)}`;
+      return `<div class="tratt"><img src="${img(S.coperte?.[p.carta] ? 'dorso_nero' : p.carta, true)}" alt="">${testo}</div>`;
     }).join('');
     if (this.chiavi.tratt === h) return;
     this.chiavi.tratt = h;
@@ -483,7 +485,7 @@ export class VistaTV {
       }
       // carte orizzontali: il rettangolo ruotato va riportato in verticale
       if (da.width > da.height) da = { left: da.left + (da.width - da.height) / 2, top: da.top - (da.width - da.height) / 2, width: da.height, height: da.width };
-      const nodo = carta(id, { cls: 'volante' });
+      const nodo = S.coperte?.[id] ? carta(null, { dorso: 'nero', cls: 'volante' }) : carta(id, { cls: 'volante' });
       nodo.style.setProperty('--c', g.colore);
       const cr = chip ? chip.getBoundingClientRect() : { left: scena.left + scena.width / 2, top: scena.bottom, width: 10, height: 10 };
       const tappa = { left: cr.left + cr.width / 2 - 30 * s, top: cr.top - 40 * s, width: 60 * s, height: 84 * s };
@@ -515,6 +517,7 @@ export class VistaTV {
     const w = el('div', 'ultima');
     w.appendChild(c);
     ult.appendChild(w);
+    ult.className = 'ultime n' + ult.children.length;
     setTimeout(() => c.classList.add('girata'), 350);
     const t = this.$('titoloSvela');
     if (t) t.textContent = `Le carte scoperte: ${S.rosse.svelate.length} su ${S.rosse.svelate.length + S.rosse.daSvelare.length}`;
@@ -527,6 +530,7 @@ export class VistaTV {
       if (id) st.appendChild(this.miniStoria(id, S));
       w.remove();
     }
+    while (st.children.length > 16) st.firstElementChild.remove();
   }
 
   eliminata(e, S) {
@@ -570,6 +574,7 @@ export class VistaTV {
       w.appendChild(c);
       w.appendChild(el('div', 'cartellino', euro(e.v)));
       ult.appendChild(w);
+      ult.className = 'ultime n1';
       setTimeout(() => c.classList.add('girata'), 500);
       ult.dataset.g = 'premio';
       const t = this.$('titoloSvela');
@@ -599,11 +604,11 @@ export class VistaTV {
     const im = a.querySelector(`img[data-id="${e.carta}"]`);
     const da = (im || a).getBoundingClientRect();
     const br = b.getBoundingClientRect();
-    const nodo = carta(e.carta, { mini: true, cls: 'volante' });
+    const nodo = S.coperte?.[e.carta] ? carta(null, { mini: true, dorso: 'nero', cls: 'volante' }) : carta(e.carta, { mini: true, cls: 'volante' });
     if (im) im.style.visibility = 'hidden';
     const w = da.width < 80 ? da.width : 50;
     vola(nodo, { left: da.left, top: da.top, width: w, height: w * 1.4 }, { left: br.left + br.width / 2 - 25, top: br.top + 10, width: 50, height: 70 }, { durata: 1100, ruota: 360 })
       .then(() => { nodo.remove(); this.chiavi.gioc = ''; this.giocatori(this.S); b.classList.remove('riceve'); void b.offsetWidth; });
-    toast(`${S.giocatori[e.a]?.nome} compra ${conArticolo(e.carta)} da ${S.giocatori[e.da]?.nome} per ${euro(e.prezzo)}`);
+    toast(`${S.giocatori[e.a]?.nome} compra ${S.coperte?.[e.carta] ? 'una carta coperta' : conArticolo(e.carta)} da ${S.giocatori[e.da]?.nome} per ${euro(e.prezzo)}`);
   }
 }

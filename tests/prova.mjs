@@ -44,6 +44,23 @@ while (Date.now() - t0 < 14 * 60 * 1000) {
     const si = await t.$('#si');
     if (si) await (Math.random() < 0.7 ? si : await t.$('#no')).click().catch(() => {});
   }
+  // le carte in regalo sono coperte agli altri: sulla TV si vede il dorso
+  if (S.fase === 'asta' && !fatte.has('coperte')) {
+    fatte.add('coperte');
+    await tv.waitForTimeout(1500);
+    const dorsi = await tv.$$eval('#giocatori img', (l) => l.filter((i) => i.src.includes('dorso_nero')).length);
+    const altri = await tel[1].$$eval('#tavolo img', (l) => l.filter((i) => i.src.includes('dorso_nero')).length);
+    console.log('regali coperti: TV', dorsi, '- telefono di Giulia', altri);
+    if (dorsi < 4) errori.push('le carte in regalo non sono coperte sulla TV');
+    // Stefano mostra le sue carte e poi le ricopre
+    await tel[0].click('[data-tutte="0"]').catch(() => errori.push('manca il pulsante mostra tutte'));
+    await tv.waitForTimeout(800);
+    const dopo = await tv.$$eval('#giocatori img', (l) => l.filter((i) => i.src.includes('dorso_nero')).length);
+    console.log('dopo "mostra tutte": dorsi sulla TV', dopo);
+    if (dopo !== dorsi - 1) errori.push('mostra tutte non ha scoperto la carta');
+    await tel[0].screenshot({ path: `${OUT}/04b_tel_coperte.png` });
+    await tel[0].click('[data-tutte="1"]').catch(() => errori.push('manca il pulsante copri tutte'));
+  }
   if (S.fase === 'asta' && S.lotto && !fatte.has('asta') && S.lotto.migliore && S.nLotti > 3) {
     fatte.add('asta');
     await tv.screenshot({ path: `${OUT}/03_tv_asta.png` });
