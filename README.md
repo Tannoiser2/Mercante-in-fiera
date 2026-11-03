@@ -13,7 +13,8 @@ Si gioca qui: **https://tannoiser2.github.io/Mercante-in-fiera/** (sulla TV: *Ap
 
 1. **Sala d'attesa** - la TV mostra il QR code e il codice di 4 lettere. Il banditore saluta chi arriva.
    Si possono cambiare le regole della casa: posta a testa, base d'asta, rilancio minimo, carte in regalo,
-   numero di carte vincenti (automatico: 3-6 secondo i giocatori) e ritmo (calmo, normale, svelto).
+   numero di carte vincenti (automatico: 3-6 secondo i giocatori), **carte in gioco** (da 6 a 40: con poche carte
+   la partita dura pochi minuti, comodo per le prove) e ritmo (calmo, normale, svelto).
 2. **Regali** - ognuno versa la posta e riceve una carta in regalo dal mazzo nero.
 3. **Asta** - il banditore mette all'asta le carte del mazzo nero:
    - **scoperte** (una o più carte che si vedono),

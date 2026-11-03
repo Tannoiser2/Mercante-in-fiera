@@ -200,8 +200,8 @@ export class Telefono {
     const S = this.S, m = this.vive(this.me).length;
     let N, W, premi;
     if (!S.rosse) {
-      N = 40;
-      W = S.cfg.vincenti || vincentiPerGiocatori(Object.keys(S.giocatori).length);
+      N = S.figure ? S.figure.length : 40;
+      W = Math.max(2, Math.min(S.cfg.vincenti || vincentiPerGiocatori(Object.keys(S.giocatori).length), Math.floor(N / 2)));
       premi = Object.values(S.conti).reduce((a, c) => a + c.posta + c.aste, 0);
     } else {
       const R = S.rosse;

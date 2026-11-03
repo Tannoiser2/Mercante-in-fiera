@@ -5,7 +5,7 @@ import { ACCEL, CARTE, CARTA, INDIZI, COLORI, euro, euroParlato, mescola, caso, 
 import { frase } from './frasi.js';
 import { parla, zitto, suona } from './suoni.js';
 
-const CFG_BASE = { posta: 100, base: 20, passo: 10, regalo: 1, vincenti: 0, velocita: 1, voce: true };
+const CFG_BASE = { posta: 100, base: 20, passo: 10, regalo: 1, vincenti: 0, velocita: 1, voce: true, nCarte: 40 };
 
 export class Banditore {
   constructor(rete, vista) {
@@ -178,7 +178,10 @@ export class Banditore {
     const S = this.S;
     if (S.fase !== 'attesa' || Object.keys(S.giocatori).length < 1) return;
     S.fase = 'regali';
-    S.mazzo = mescola(CARTE.map((c) => c.id));
+    // per le prove si può giocare con meno figure: le stesse nel mazzo nero e in quello rosso
+    const n = Math.max(6, Math.min(CARTE.length, S.cfg.nCarte || CARTE.length));
+    S.figure = mescola(CARTE.map((c) => c.id)).slice(0, n);
+    S.mazzo = mescola(S.figure);
     S.nere = {}; S.coperte = {}; S.eliminate = []; S.tentativi = {}; S.vincite = []; S.proposte = {};
     S.serie = null; S.sfortuna = null; S.pochi = [];
     for (const uid of Object.keys(S.giocatori)) S.conti[uid] = { posta: S.cfg.posta, aste: 0, scambi: 0, premi: 0 };
@@ -393,11 +396,13 @@ export class Banditore {
     let tot = 0;
     for (const u of giocatori) tot += (S.conti[u].posta || 0) + (S.conti[u].aste || 0);
     S.montepremi = tot;
-    const W = S.cfg.vincenti || vincentiPerGiocatori(giocatori.length);
+    const figure = S.figure || CARTE.map((c) => c.id);
+    // con poche figure le carte vincenti non possono essere più della metà
+    const W = Math.max(2, Math.min(S.cfg.vincenti || vincentiPerGiocatori(giocatori.length), Math.floor(figure.length / 2)));
     const perc = RIPARTIZIONE[W];
     const premi = perc.map((p) => Math.floor((tot * p) / 100 / 10) * 10);
     premi[premi.length - 1] += tot - premi.reduce((a, b) => a + b, 0);
-    const tutte = mescola(CARTE.map((c) => c.id));
+    const tutte = mescola(figure);
     S.rosse = { vincenti: tutte.slice(0, W), premi, daSvelare: tutte.slice(W), svelate: [], premiate: [], riporto: 0 };
     this.salva();
     await this.di('fineAsta', { cifra: tot });

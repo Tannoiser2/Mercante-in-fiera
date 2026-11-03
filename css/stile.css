@@ -347,7 +347,7 @@ img { -webkit-user-drag: none; user-select: none; }
 .sala-gioc .togli { border: 0; background: #0001; border-radius: 99px; font-size: 13px; padding: 4px 8px; margin-left: 10px; color: #7d6b5d; }
 .sala-gioc .vuoto { font-size: 26px; text-align: center; width: 100%; margin-top: 60px; }
 .sala-cfg { width: 410px; display: flex; flex-direction: column; }
-.sala-cfg .riga { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 20px; font-weight: 700; }
+.sala-cfg .riga { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 19px; font-weight: 700; }
 .sala-cfg .riga span { flex: 1; }
 .sala-cfg .riga b { min-width: 110px; text-align: center; font-size: 22px; }
 .sala-cfg .riga button { border: 0; background: #e8d9b5; border-radius: 10px; padding: 8px 10px; font-weight: 800; font-size: 15px; }

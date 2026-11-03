@@ -160,6 +160,7 @@ export class VistaTV {
         ${this.riga('Rilancio minimo', euro(c.passo), 'passo', 10, 10, 200)}
         ${this.riga('Carte in regalo', String(c.regalo), 'regalo', 1, 0, 3)}
         ${this.riga('Carte vincenti', c.vincenti ? String(c.vincenti) : 'automatico', 'vincenti', 1, 0, 6)}
+        ${this.riga('Carte in gioco', (c.nCarte || 40) >= 40 ? 'tutte (40)' : String(c.nCarte), 'nCarte', 2, 6, 40)}
         ${this.riga('Ritmo', ['', 'calmo', 'normale', 'svelto'][c.velocita === 0.75 ? 1 : c.velocita === 1.35 ? 3 : 2], 'velocita', 0, 0, 0)}
         <div class="riga voce-riga"><span>Voce</span>${voci.length
           ? `<select id="sceltaVoce">${voci.map((v) => `<option value="${esc(v.name)}" ${v.name === voceInUso() ? 'selected' : ''}>${esc(v.name.replace(/\s*\((italiano|italian|italia|italy)\b.*$/i, ''))}</option>`).join('')}</select>`
@@ -184,6 +185,8 @@ export class VistaTV {
           this.b.cfg(key, passo(c[key] || 1, d, Number(b.dataset.min), Number(b.dataset.max)));
           impostaVoce({ vel: this.b.S.cfg.voceVel || 1, tono: this.b.S.cfg.voceTono || 1 });
           this.provaVoce();
+        } else if (key === 'nCarte') {
+          this.b.cfg('nCarte', passo(c.nCarte || 40, d, 6, 40));
         } else this.b.cfg(key, passo(c[key], d, Number(b.dataset.min), Number(b.dataset.max)));
       };
     });
@@ -212,9 +215,11 @@ export class VistaTV {
     f.classList.toggle('vis', !!b.testo);
     f.classList.add('pop');
     const a = this.$('avatar');
-    a.src = this.pose[b.posa] || this.pose.parla || 'avatar/base.webp';
+    // la posa del momento; se l'immagine manca resta lo sticker originale con un movimento animato
     const box = a.parentElement;
-    box.className = 'avatar-box posa-' + b.posa + (this.pose[b.posa] || this.pose.parla ? ' immagine' : '');
+    a.onerror = () => { a.onerror = null; a.src = 'avatar/base.webp'; box.classList.remove('immagine'); };
+    a.src = `avatar/${b.posa}.webp`;
+    box.className = 'avatar-box posa-' + b.posa + ' immagine';
     box.classList.remove('parla');
     void box.offsetWidth;
     box.classList.add('parla');
